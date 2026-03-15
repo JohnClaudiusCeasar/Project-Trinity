@@ -1,0 +1,157 @@
+/* ========================================
+   PROJECT TRINITY - GLOBAL STYLES
+   ======================================== */
+
+/* CSS Variables (Design Tokens) */
+:root {
+    --primary-color: #000000;
+    --secondary-color: #ffffff;
+    --accent-color: #eaeaea;
+    --text-color: #000000;
+    --divider-color: #000000;
+    --creator-bg: #d9d9d9;
+    --creator-text: #787878;
+    --font-display: 'Inria Sans', serif;
+    --font-body: 'Inria Sans', serif;
+    --spacing-lg: 40px;
+    --spacing-md: 20px;
+    --spacing-sm: 10px;
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+}
+
+/* Page Container */
+.page-container {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--secondary-color);
+}
+
+/* Border Frame Container - Fixed Overlay */
+.border-frame {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 50;
+    pointer-events: none;
+    border: 2px solid var(--primary-color);
+}
+
+/* Decorative Corners */
+.corner {
+    position: fixed;
+    width: 120px;
+    height: 120px;
+    background-color: var(--primary-color);
+    border-radius: 100%;
+    z-index: 51;
+}
+
+.corner-top-left {
+    top: -60px;
+    left: -60px;
+}
+
+.corner-top-right {
+    top: -60px;
+    right: -60px;
+}
+
+.corner-bottom-left {
+    bottom: -60px;
+    left: -60px;
+}
+
+.corner-bottom-right {
+    bottom: -60px;
+    right: -60px;
+}
+
+/* Global Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design - Global Adjustments */
+@media (max-width: 1200px) {
+    :root {
+        --spacing-lg: 30px;
+        --spacing-md: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --spacing-lg: 20px;
+        --spacing-md: 10px;
+    }
+
+    .corner {
+        width: 80px;
+        height: 80px;
+    }
+
+    .corner-top-left {
+        top: -40px;
+        left: -40px;
+    }
+
+    .corner-top-right {
+        top: -40px;
+        right: -40px;
+    }
+
+    .corner-bottom-left {
+        bottom: -40px;
+        left: -40px;
+    }
+
+    .corner-bottom-right {
+        bottom: -40px;
+        right: -40px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --spacing-lg: 15px;
+        --spacing-md: 8px;
+    }
+}

@@ -1,0 +1,304 @@
+/* ========================================
+   PROJECT TRINITY - LOGIN PAGE STYLES
+   ======================================== */
+
+/* Login Section */
+.login-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 10;
+    background-color: var(--secondary-color);
+    padding-top: 80px;
+}
+
+/* Tabs Container */
+.tabs-container {
+    margin-bottom: 60px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.tab-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.tab-button {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: 5px;
+    color: var(--text-color);
+    padding: 10px 30px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.tab-button:hover {
+    background-color: var(--accent-color);
+    border-radius: 50px;
+}
+
+.tab-active {
+    background-color: var(--accent-color);
+    border-radius: 50px;
+}
+
+.tab-link {
+    color: var(--text-color);
+}
+
+.tab-divider {
+    width: 2px;
+    height: 32px;
+    background-color: var(--divider-color);
+    margin: 0 15px;
+}
+
+/* Form Wrapper */
+.form-wrapper {
+    border: 2px solid var(--primary-color);
+    padding: 60px;
+    width: 740px;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* Form Groups */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: relative;
+}
+
+.form-label {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: 3.75px;
+    color: var(--text-color);
+    text-transform: uppercase;
+}
+
+.form-input {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: var(--text-color);
+    background-color: transparent;
+    border: none;
+    padding: 10px 0;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.form-input::placeholder {
+    color: transparent;
+}
+
+.form-input:focus {
+    color: var(--text-color);
+}
+
+.form-underline {
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary-color);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus ~ .form-underline {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-top: -10px;
+}
+
+.strength-label {
+    color: var(--text-color);
+    text-transform: uppercase;
+}
+
+.strength-indicator {
+    color: #d9534f;
+    font-weight: 700;
+}
+
+/* Enter Button */
+.enter-button {
+    align-self: flex-start;
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: 3.75px;
+    color: var(--text-color);
+    background-color: var(--accent-color);
+    border: none;
+    padding: 15px 40px;
+    border-radius: 35px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    margin-top: 20px;
+}
+
+.enter-button:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.enter-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .form-wrapper {
+        width: 600px;
+        padding: 50px;
+    }
+
+    .form-label {
+        font-size: 22px;
+        letter-spacing: 3.3px;
+    }
+
+    .form-input {
+        font-size: 18px;
+        letter-spacing: 2.7px;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-section {
+        padding-top: 60px;
+    }
+
+    .tabs-container {
+        margin-bottom: 40px;
+    }
+
+    .tab-button {
+        font-size: 18px;
+        letter-spacing: 3px;
+        padding: 8px 20px;
+    }
+
+    .form-wrapper {
+        width: 90%;
+        max-width: 500px;
+        padding: 40px;
+        gap: 40px;
+    }
+
+    .form-label {
+        font-size: 18px;
+        letter-spacing: 2.7px;
+    }
+
+    .form-input {
+        font-size: 16px;
+        letter-spacing: 2.4px;
+    }
+
+    .enter-button {
+        font-size: 20px;
+        letter-spacing: 3px;
+        padding: 12px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-section {
+        padding-top: 40px;
+    }
+
+    .tabs-container {
+        margin-bottom: 30px;
+    }
+
+    .tab-button {
+        font-size: 16px;
+        letter-spacing: 2px;
+        padding: 6px 16px;
+    }
+
+    .tab-divider {
+        height: 24px;
+        margin: 0 8px;
+    }
+
+    .form-wrapper {
+        width: 95%;
+        padding: 30px;
+        gap: 30px;
+    }
+
+    .form-label {
+        font-size: 16px;
+        letter-spacing: 2.4px;
+    }
+
+    .form-input {
+        font-size: 14px;
+        letter-spacing: 2.1px;
+    }
+
+    .enter-button {
+        font-size: 18px;
+        letter-spacing: 2.7px;
+        padding: 10px 25px;
+    }
+}
