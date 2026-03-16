@@ -307,7 +307,8 @@ main {
     background-color: var(--secondary);
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 600px;
+    overflow: hidden;
 }
 
 .section-title {
@@ -361,6 +362,7 @@ main {
     overflow-y: auto;
     flex: 1;
     padding-right: 0.5rem;
+    min-height: 0;
 }
 
 .entry-list::-webkit-scrollbar {
@@ -383,13 +385,14 @@ main {
 
 /* Entry Items */
 .entry-item {
-    padding: 1.5rem;
+    padding: 2rem;
     border: var(--border);
     background-color: var(--accent);
     transition: var(--transition);
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .entry-item::after {
