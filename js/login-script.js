@@ -33,22 +33,44 @@ function initializeLoginForm() {
  * Handle login form submission
  */
 function handleLogin() {
-    const emailUsername = document.getElementById('email-username').value.trim();
+    const login = document.getElementById('email-username').value.trim();
     const password = document.getElementById('password').value.trim();
     
     // Basic validation
-    if (!emailUsername || !password) {
+    if (!login || !password) {
         console.warn('Please fill in all fields');
         alert('Please fill in all fields');
         return;
     }
     
-    // Here you would normally send the data to your PHP backend
-    console.log('Login attempt:', { emailUsername, password });
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('login', login);
+    formData.append('password', password);
     
-    // For now, just show a success message
-    // In production, this would be handled by PHP
-    alert('Login credentials submitted. This would be processed by your PHP backend.');
+    // Send to PHP backend
+    fetch('php/login-process.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Login successful');
+            alert('Login successful! Redirecting...');
+            // Redirect to dashboard
+            window.location.href = data.redirect;
+        } else {
+            // Show error message
+            const errorMessage = data.message || 'Login failed. Please try again.';
+            console.error('Login error:', errorMessage);
+            alert(errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
 }
 
 /**
@@ -100,6 +122,3 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
-
-console.log('Project Trinity Login JavaScript initialized');
-
