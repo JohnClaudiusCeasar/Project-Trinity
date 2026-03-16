@@ -61,11 +61,42 @@ function handleRegister() {
         return;
     }
     
-    // Here you would normally send the data to your PHP backend
-    console.log('Register attempt:', { username, password, email });
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+    formData.append('confirm_password', confirmPassword);
+    formData.append('email', email);
     
-    // For now, just show a success message
-    alert('Registration data submitted. This would be processed by your PHP backend.');
+    // Send to PHP backend
+    fetch('php/register-process.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Registration successful');
+            alert('Registration successful! Redirecting...');
+            // Redirect to dashboard
+            window.location.href = data.redirect;
+        } else {
+            // Show error messages
+            if (data.errors && Array.isArray(data.errors)) {
+                const errorMessage = data.errors.join('\n');
+                console.error('Registration errors:', errorMessage);
+                alert('Registration failed:\n' + errorMessage);
+            } else {
+                const errorMessage = data.message || 'Registration failed. Please try again.';
+                console.error('Registration error:', errorMessage);
+                alert(errorMessage);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
 }
  
 /**
@@ -174,5 +205,3 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
- 
-console.log('Project Trinity Register JavaScript initialized');
