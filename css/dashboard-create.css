@@ -1,0 +1,211 @@
+/* --- Picker Grid --- */
+.create-picker {
+    padding: 0 2rem 2rem;
+}
+
+.create-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    max-width: 860px;
+}
+
+/* --- Type Card --- */
+.create-type-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 2rem;
+    background: var(--secondary, #fff);
+    border: 2px solid var(--primary, #000);
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Inria Sans', sans-serif;
+    transition: background 0.15s ease, color 0.15s ease;
+    outline: none;
+}
+
+.create-type-card:hover,
+.create-type-card:focus-visible {
+    background: var(--primary, #000);
+    color: var(--secondary, #fff);
+}
+
+.create-type-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.create-type-label {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.create-type-desc {
+    font-size: 0.875rem;
+    opacity: 0.65;
+    line-height: 1.45;
+}
+
+.create-type-arrow {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.75rem;
+    font-size: 1.1rem;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.create-type-card:hover .create-type-arrow,
+.create-type-card:focus-visible .create-type-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* --- Form Wrapper --- */
+.create-form-wrapper {
+    display: none;
+    padding: 0 2rem 2rem;
+    max-width: 640px;
+    animation: fadeInUp 0.25s ease-out;
+}
+
+.create-form-wrapper.visible {
+    display: block;
+}
+
+/* --- Back Button --- */
+.create-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 1.75rem;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.create-back-btn:hover {
+    opacity: 1;
+}
+
+/* --- Form Header --- */
+.create-form-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid var(--primary, #000);
+}
+
+.create-form-type-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.create-form-type-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin-bottom: 0.2rem;
+}
+
+.create-form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* --- Form Fields --- */
+.create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.65rem 0;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--primary, #000);
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--primary, #000);
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    border-bottom-color: #555;
+}
+
+.form-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-select {
+    appearance: none;
+    cursor: pointer;
+}
+
+/* --- Skeleton Notice --- */
+.form-skeleton-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.45;
+    padding: 0.75rem 1rem;
+    border: 1px dashed var(--primary, #000);
+}
+
+/* --- Form Actions --- */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 0.5rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    .create-type-grid {
+        grid-template-columns: 1fr;
+    }
+}
