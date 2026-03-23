@@ -1,123 +1,7 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-:root {
-    --primary: #000000;
-    --secondary: #ffffff;
-    --accent: #eaeaea;
-    --creator-bg: #d9d9d9;
-    --border: 2px solid var(--primary);
-    --transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-body {
-    font-family: 'Inria Sans', sans-serif;
-    background-color: var(--secondary);
-    color: var(--primary);
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-
-/* ============================================
-   HEADER / NAVIGATION
-   ============================================ */
-
-header {
-    border-bottom: var(--border);
-    padding: 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    background-color: var(--secondary);
-    z-index: 100;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.logo-img {
-    height: 1.5rem;
-    width: auto;
-    aspect-ratio: 1;
-}
-
-.logo-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-}
-
-nav {
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-}
-
-nav a {
-    text-decoration: none;
-    color: var(--primary);
-    font-size: 0.95rem;
-    border-bottom: 2px solid transparent;
-    transition: var(--transition);
-    padding-bottom: 0.25rem;
-}
-
-nav a:hover {
-    border-bottom-color: var(--primary);
-}
-
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    border-left: var(--border);
-    padding-left: 2rem;
-}
-
-.avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: var(--creator-bg);
-    border: var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.25rem;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.avatar:hover {
-    transform: scale(1.1);
-}
-
-/* ============================================
-   MAIN CONTAINER
-   ============================================ */
-
-main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 3rem 2rem;
-}
+/* ============================================================
+   PROJECT TRINITY — dashboard-styles.css
+   Content styles: stats, entries, aside cards, animations
+   ============================================================ */
 
 /* ============================================
    HERO SECTION
@@ -258,17 +142,6 @@ main {
     transition: var(--transition);
 }
 
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.02) 100%);
-    pointer-events: none;
-}
-
 .stat-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
@@ -295,13 +168,8 @@ main {
     color: #666;
 }
 
-.stat-change.positive {
-    color: #27a745;
-}
-
-.stat-change.negative {
-    color: #dc3545;
-}
+.stat-change.positive { color: #27a745; }
+.stat-change.negative { color: #dc3545; }
 
 /* ============================================
    CONTENT GRID
@@ -313,7 +181,6 @@ main {
     gap: 3rem;
     animation: fadeInUp 0.6s ease-out 0.2s backwards;
     align-items: start;
-    max-height: calc(100vh - 400px);
 }
 
 /* ============================================
@@ -341,7 +208,6 @@ main {
     flex-shrink: 0;
 }
 
-/* Category Filter */
 .filter-container {
     display: flex;
     gap: 0.75rem;
@@ -364,15 +230,8 @@ main {
     transition: var(--transition);
 }
 
-.filter-btn:hover {
-    background-color: var(--accent);
-}
-
-.filter-btn.active {
-    background-color: var(--primary);
-    color: var(--secondary);
-    font-weight: 700;
-}
+.filter-btn:hover    { background-color: var(--accent); }
+.filter-btn.active   { background-color: var(--primary); color: var(--secondary); font-weight: 700; }
 
 .entry-list {
     display: flex;
@@ -384,25 +243,11 @@ main {
     min-height: 0;
 }
 
-.entry-list::-webkit-scrollbar {
-    width: 8px;
-}
+.entry-list::-webkit-scrollbar       { width: 8px; }
+.entry-list::-webkit-scrollbar-track { background: var(--accent); border-left: var(--border); }
+.entry-list::-webkit-scrollbar-thumb { background: var(--primary); border: var(--border); }
+.entry-list::-webkit-scrollbar-thumb:hover { background: #333; }
 
-.entry-list::-webkit-scrollbar-track {
-    background: var(--accent);
-    border-left: var(--border);
-}
-
-.entry-list::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border: var(--border);
-}
-
-.entry-list::-webkit-scrollbar-thumb:hover {
-    background: #333;
-}
-
-/* Entry Items */
 .entry-item {
     padding: 2rem;
     border: var(--border);
@@ -426,22 +271,10 @@ main {
     z-index: -1;
 }
 
-.entry-item:hover::after {
-    right: 0;
-}
+.entry-item:hover::after { right: 0; }
 
-.entry-title {
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.entry-meta {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 0.75rem;
-}
-
+.entry-title    { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+.entry-meta     { font-size: 0.85rem; color: #666; margin-bottom: 0.75rem; }
 .entry-creators {
     font-size: 0.85rem;
     color: #555;
@@ -450,11 +283,7 @@ main {
     border-left: 2px solid var(--primary);
     padding-left: 0.75rem;
 }
-
-.entry-creators strong {
-    font-weight: 700;
-    font-style: normal;
-}
+.entry-creators strong { font-weight: 700; font-style: normal; }
 
 .entry-tags {
     display: flex;
@@ -474,10 +303,10 @@ main {
 }
 
 /* ============================================
-   SIDEBAR
+   DASHBOARD ASIDE (inside archive fragment)
    ============================================ */
 
-.sidebar {
+.dashboard-aside {
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -497,7 +326,6 @@ main {
     letter-spacing: 0.05em;
 }
 
-/* Creator List */
 .creator-list {
     display: flex;
     flex-direction: column;
@@ -515,9 +343,7 @@ main {
     transition: var(--transition);
 }
 
-.creator-item:hover {
-    background-color: var(--accent);
-}
+.creator-item:hover { background-color: var(--accent); }
 
 .creator-avatar {
     width: 40px;
@@ -532,21 +358,9 @@ main {
     flex-shrink: 0;
 }
 
-.creator-info {
-    flex: 1;
-}
+.creator-name { font-weight: 700; font-size: 0.95rem; }
+.creator-role { font-size: 0.8rem; color: #666; }
 
-.creator-name {
-    font-weight: 700;
-    font-size: 0.95rem;
-}
-
-.creator-role {
-    font-size: 0.8rem;
-    color: #666;
-}
-
-/* Action Buttons */
 .action-buttons {
     display: flex;
     flex-direction: column;
@@ -570,48 +384,26 @@ main {
     text-align: center;
 }
 
-.btn:hover {
-    background-color: var(--primary);
-    color: var(--secondary);
-}
-
-.btn-secondary {
-    background-color: var(--accent);
-}
-
-.btn-secondary:hover {
-    background-color: var(--primary);
-    color: var(--secondary);
-}
+.btn:hover          { background-color: var(--primary); color: var(--secondary); }
+.btn-secondary      { background-color: var(--accent); }
+.btn-secondary:hover { background-color: var(--primary); color: var(--secondary); }
 
 /* ============================================
    ANIMATIONS
    ============================================ */
 
 @keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================
-   CIRCULAR ACCENT CORNER (TRINITY SIGNATURE)
+   CIRCULAR ACCENT CORNERS (TRINITY SIGNATURE)
    ============================================ */
 
 .corner-accent {
@@ -622,80 +414,25 @@ main {
     background-color: var(--creator-bg);
     border: var(--border);
     pointer-events: none;
-}
-
-.corner-accent.top-left {
-    top: -60px;
-    left: -60px;
     z-index: 1;
 }
 
-.corner-accent.bottom-right {
-    bottom: -60px;
-    right: -60px;
-    z-index: 1;
-}
+.corner-accent.top-left    { top: -60px; left: -60px; }
+.corner-accent.bottom-right { bottom: -60px; right: -60px; }
 
 /* ============================================
-   RESPONSIVE DESIGN
+   RESPONSIVE
    ============================================ */
 
 @media (max-width: 768px) {
-    .dashboard-hero h1 {
-        font-size: 2rem;
-    }
-
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-
-    header {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    nav {
-        flex-direction: column;
-        width: 100%;
-        gap: 1rem;
-    }
-
-    .user-menu {
-        border-left: none;
-        border-top: var(--border);
-        padding-left: 0;
-        padding-top: 1rem;
-        width: 100%;
-    }
-
-    .stats-grid {
-        gap: 1.5rem;
-    }
+    .dashboard-hero h1 { font-size: 2rem; }
+    .content-grid { grid-template-columns: 1fr; }
+    .stats-grid { gap: 1.5rem; }
 }
 
 @media (max-width: 480px) {
-    main {
-        padding: 1.5rem 1rem;
-    }
-
-    .dashboard-hero h1 {
-        font-size: 1.5rem;
-    }
-
-    .stat-value {
-        font-size: 2rem;
-    }
-
-    header {
-        padding: 1rem;
-    }
-
-    .filter-container {
-        gap: 0.5rem;
-    }
-
-    .filter-btn {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-    }
+    .dashboard-hero h1 { font-size: 1.5rem; }
+    .stat-value { font-size: 2rem; }
+    .filter-container { gap: 0.5rem; }
+    .filter-btn { padding: 0.5rem 0.75rem; font-size: 0.75rem; }
 }

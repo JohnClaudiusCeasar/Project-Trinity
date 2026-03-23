@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Trinity – Creator Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard-layout.css">
+    <link rel="stylesheet" href="css/dashboard-styles.css">
+    <link rel="stylesheet" href="css/dashboard-archives.css">
+    <link rel="stylesheet" href="css/dashboard-create.css">
+</head>
+<body>
+
+    <!-- Circular corner accents (Trinity signature) -->
+    <div class="corner-accent top-left"></div>
+    <div class="corner-accent bottom-right"></div>
+
+    <!-- Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+            <div class="sidebar-logo-container" id="sidebarLogoClose">
+                <img src="assets/Trinity.svg" alt="Trinity Logo" class="logo-img">
+                <span class="logo-text">Trinity</span>
+            </div>
+            <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close sidebar">✕</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-label">Menu</div>
+            <a href="#archives" class="sidebar-nav-item active" data-page="archives">
+                <span class="nav-icon">◈</span>
+                <span>Archives</span>
+            </a>
+            <a href="#view" class="sidebar-nav-item" data-page="view">
+                <span class="nav-icon">◎</span>
+                <span>View</span>
+            </a>
+            <a href="#create" class="sidebar-nav-item" data-page="create">
+                <span class="nav-icon">✦</span>
+                <span>Create</span>
+            </a>
+            <a href="#projects" class="sidebar-nav-item" data-page="projects">
+                <span class="nav-icon">⬡</span>
+                <span>Projects</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-profile">
+            <div class="sidebar-divider"></div>
+            <div class="profile-card">
+                <div class="profile-avatar">H</div>
+                <div class="profile-info">
+                    <div class="profile-name">Horace</div>
+                    <div class="profile-role">Creator</div>
+                </div>
+                <a href="index.html" class="profile-logout" title="Log out">⏻</a>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ===================== PAGE WRAPPER ===================== -->
+    <div class="page-wrapper" id="pageWrapper">
+
+        <header class="site-header">
+            <div class="logo-container" id="logoContainer">
+                <img src="assets/Trinity.svg" alt="Trinity Logo" class="logo-img">
+                <span class="logo-text">Trinity</span>
+            </div>
+            <nav class="header-nav">
+                <a href="#archives" class="header-nav-item active" data-page="archives">Archives</a>
+                <a href="#explore" class="header-nav-item" data-page="explore">Explore</a>
+                <a href="#guides" class="header-nav-item" data-page="guides">Guides</a>
+            </nav>
+            <div class="user-menu">
+                <span>Welcome, Creator</span>
+                <div class="avatar">H</div>
+            </div>
+        </header>
+
+        <!-- Main Content Slot — injected dynamically by dashboard-script.js -->
+        <main class="site-main" id="mainContent" data-section="archives"></main>
+
+    </div><!-- /.page-wrapper -->
+
+    <script src="js/dashboard-script.js"></script>
+</body>
+</html>
