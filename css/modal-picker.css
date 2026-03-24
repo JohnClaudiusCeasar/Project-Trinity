@@ -1,0 +1,259 @@
+/* ============================================================
+   PICKER MODAL — modal-picker.css
+   Shared relational picker modal styles.
+   Used by any form type that calls openPickerModal().
+   ============================================================ */
+
+/* --- Picker Field (inside form fragments) --- */
+.picker-field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0;
+    border-bottom: 2px solid var(--primary, #000);
+    min-height: 2.4rem;
+}
+
+.picker-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.picker-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem 0.2rem 0.65rem;
+    background: var(--primary, #000);
+    color: var(--secondary, #fff);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    font-family: 'Inria Sans', sans-serif;
+}
+
+.picker-chip-remove {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity 0.1s;
+    font-family: inherit;
+}
+
+.picker-chip-remove:hover {
+    opacity: 1;
+}
+
+.picker-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: 1px dashed rgba(0, 0, 0, 0.3);
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--primary, #000);
+    opacity: 0.55;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    transition: opacity 0.15s, border-color 0.15s;
+}
+
+.picker-trigger:hover {
+    opacity: 1;
+    border-color: var(--primary, #000);
+}
+
+.picker-trigger-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+/* --- Modal Overlay & Container --- */
+.picker-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    animation: fadeIn 0.15s ease;
+}
+
+.picker-modal-backdrop.open {
+    display: block;
+}
+
+.picker-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -48%);
+    width: min(520px, calc(100vw - 2rem));
+    max-height: 80vh;
+    background: var(--secondary, #fff);
+    border: 2px solid var(--primary, #000);
+    z-index: 201;
+    flex-direction: column;
+    animation: fadeInUp 0.2s ease-out;
+}
+
+.picker-modal.open {
+    display: flex;
+}
+
+/* --- Modal Header --- */
+.picker-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 2px solid var(--primary, #000);
+}
+
+.picker-modal-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.4;
+    margin-bottom: 0.2rem;
+}
+
+.picker-modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.picker-modal-close {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+    font-family: inherit;
+    line-height: 1;
+    margin-top: 0.1rem;
+}
+
+.picker-modal-close:hover {
+    opacity: 1;
+}
+
+/* --- Search --- */
+.picker-modal-search {
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.picker-search-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--primary, #000);
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--primary, #000);
+    outline: none;
+    padding: 0.4rem 0;
+    box-sizing: border-box;
+}
+
+/* --- List --- */
+.picker-modal-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    overflow-y: auto;
+    flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary, #000) transparent;
+}
+
+.picker-modal-list::-webkit-scrollbar { width: 3px; }
+.picker-modal-list::-webkit-scrollbar-thumb { background: var(--primary, #000); }
+
+.picker-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.85rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-left: 3px solid transparent;
+}
+
+.picker-list-item:hover {
+    background: var(--accent, #eaeaea);
+}
+
+.picker-list-item.selected {
+    border-left-color: var(--primary, #000);
+    background: var(--accent, #eaeaea);
+}
+
+.picker-item-check {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--primary, #000);
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 900;
+    transition: background 0.1s;
+}
+
+.picker-list-item.selected .picker-item-check {
+    background: var(--primary, #000);
+    color: var(--secondary, #fff);
+}
+
+.picker-item-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.picker-item-desc {
+    font-size: 0.8rem;
+    opacity: 0.55;
+    line-height: 1.4;
+}
+
+.picker-list-empty {
+    padding: 2rem 1.5rem;
+    font-size: 0.85rem;
+    opacity: 0.4;
+    font-style: italic;
+    text-align: center;
+}
+
+/* --- Footer --- */
+.picker-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-top: 2px solid var(--primary, #000);
+}
+
+.picker-selected-count {
+    font-size: 0.8rem;
+    font-weight: 700;
+    opacity: 0.45;
+    letter-spacing: 0.04em;
+}

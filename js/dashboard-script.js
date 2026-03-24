@@ -9,8 +9,8 @@
 // - type: 'placeholder' → renders a "Content in Development" card
 // ------------------------------------------------------------
 const NAV_ROUTES = {
-    archives: { type: 'fetch', src: 'dashboardArchive.php' },
-    create:   { type: 'fetch', src: 'dashboardCreate.php'  },
+    archives: { type: 'fetch', src: 'content-pages/Dashboard/dashboardArchive.php' },
+    create:   { type: 'fetch', src: 'content-pages/Dashboard/dashboardCreate.php'  },
     view:     { type: 'placeholder', label: 'View'     },
     projects: { type: 'placeholder', label: 'Projects' },
     explore:  { type: 'placeholder', label: 'Explore'  },
@@ -153,7 +153,7 @@ function initCategoryFilter() {
 }
 
 // ------------------------------------------------------------
-// CREATE PAGE — card picker → skeleton form flow
+// CREATE PAGE — card picker → type-specific form flow
 // ------------------------------------------------------------
 const CREATE_TYPE_META = {
     story:     { icon: '◎', label: 'Story'             },
@@ -162,9 +162,101 @@ const CREATE_TYPE_META = {
     object:    { icon: '✦', label: 'Object / Artifact'  },
 };
 
+// ------------------------------------------------------------
+// FORM FRAGMENT ROUTES
+// Maps each entry type to its standalone PHP form fragment.
+// Add a new entry here when a new type form is created.
+// ------------------------------------------------------------
+const CREATE_FORM_ROUTES = {
+    character: 'content-pages/Forms/characterForm.php',
+    // story:  'content-pages/Dashboard/dashboardCreate-story.php',
+    // world:  'content-pages/Dashboard/dashboardCreate-world.php',
+    // object: 'content-pages/Dashboard/dashboardCreate-object.php',
+};
+
+async function loadFormFragment(type, container) {
+    const src = CREATE_FORM_ROUTES[type];
+    if (!src) {
+        container.innerHTML = `
+            <div class="form-skeleton-notice">
+                <span>✦</span> Form fields for this type are coming in a future build.
+            </div>`;
+        return;
+    }
+    try {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error(`Failed to load form fragment: ${src}`);
+        container.innerHTML = await res.text();
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `
+            <div class="form-skeleton-notice">
+                <span>✦</span> Could not load form. Please try again.
+            </div>`;
+    }
+}
+
+
+// ------------------------------------------------------------
+// TAGS INPUT BEHAVIOUR
+// ------------------------------------------------------------
+function initTagsInputs() {
+    document.querySelectorAll('.tags-input').forEach(input => {
+        const listEl   = document.getElementById(input.id + 'List');
+        const hiddenEl = document.getElementById(input.id + 'Hidden');
+        if (!listEl || !hiddenEl) return;
+
+        let tags = [];
+
+        function renderTags() {
+            listEl.innerHTML = tags.map((tag, i) => `
+                <span class="tag-chip">
+                    ${tag}
+                    <button type="button" class="tag-remove" data-index="${i}" aria-label="Remove ${tag}">×</button>
+                </span>
+            `).join('');
+            hiddenEl.value = tags.join(',');
+        }
+
+        function addTag(raw) {
+            const val = raw.trim().replace(/,+$/, '');
+            if (val && !tags.includes(val)) {
+                tags.push(val);
+                renderTags();
+            }
+            input.value = '';
+        }
+
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                addTag(input.value);
+            } else if (e.key === 'Backspace' && input.value === '' && tags.length) {
+                tags.pop();
+                renderTags();
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            if (input.value.trim()) addTag(input.value);
+        });
+
+        listEl.addEventListener('click', e => {
+            const btn = e.target.closest('.tag-remove');
+            if (!btn) return;
+            tags.splice(Number(btn.dataset.index), 1);
+            renderTags();
+        });
+    });
+}
+
+// ------------------------------------------------------------
+// INIT CREATE PAGE
+// ------------------------------------------------------------
 function initCreatePage() {
     const picker      = document.getElementById('createPicker');
     const formWrapper = document.getElementById('createFormWrapper');
+    const formFields  = document.getElementById('createFormFields');
     const backBtn     = document.getElementById('createBackBtn');
     const cancelBtn   = document.getElementById('createCancelBtn');
     const formIcon    = document.getElementById('createFormIcon');
@@ -172,18 +264,29 @@ function initCreatePage() {
     if (!picker || !formWrapper) return;
 
     picker.querySelectorAll('.create-type-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const meta = CREATE_TYPE_META[card.dataset.type] || { icon: '✦', label: card.dataset.type };
+        card.addEventListener('click', async () => {
+            const type = card.dataset.type;
+            const meta = CREATE_TYPE_META[type] || { icon: '✦', label: type };
+
             if (formIcon)  formIcon.textContent  = meta.icon;
             if (formLabel) formLabel.textContent = meta.label;
+
             picker.style.display = 'none';
             formWrapper.classList.add('visible');
+
+            // Fetch and inject type-specific form fragment
+            if (formFields) {
+                await loadFormFragment(type, formFields);
+                initTagsInputs();
+                initPickerTriggers();   // defined in picker-modal.js
+            }
         });
     });
 
     function returnToPicker() {
         formWrapper.classList.remove('visible');
         picker.style.display = '';
+        if (formFields) formFields.innerHTML = '';
     }
 
     backBtn?.addEventListener('click', returnToPicker);
@@ -191,8 +294,23 @@ function initCreatePage() {
 }
 
 // ------------------------------------------------------------
-// INIT — load Archives by default on page load
+// INIT — fetch picker modal once, then load default page
 // ------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load picker modal markup into its persistent container
+    // (lives outside #mainContent so it survives SPA navigation)
+    const pickerContainer = document.getElementById('pickerModalContainer');
+    if (pickerContainer) {
+        try {
+            const res = await fetch('content-pages/Modals/pickerModal.php');
+            if (res.ok) {
+                pickerContainer.innerHTML = await res.text();
+                initPickerModal();   // defined in picker-modal.js
+            }
+        } catch (err) {
+            console.error('Could not load picker modal:', err);
+        }
+    }
+
     loadPage('archives');
 });

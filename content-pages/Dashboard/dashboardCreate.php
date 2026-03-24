@@ -59,46 +59,20 @@
             </div>
         </div>
 
-        <!-- Skeleton Form -->
+        <!-- Dynamic Form — fields fetched and injected by dashboard-script.js based on type -->
         <form class="create-form" id="createForm">
 
-            <div class="form-field">
-                <label class="form-label" for="entryTitle">Title</label>
-                <input class="form-input" type="text" id="entryTitle" placeholder="Give your entry a title…" disabled>
-            </div>
-
-            <div class="form-field">
-                <label class="form-label" for="entryDescription">Description</label>
-                <textarea class="form-input form-textarea" id="entryDescription" rows="4" placeholder="A brief description of this entry…" disabled></textarea>
-            </div>
-
-            <div class="form-field">
-                <label class="form-label" for="entryTags">Tags</label>
-                <input class="form-input" type="text" id="entryTags" placeholder="e.g. Fiction, Collaborative, Anomaly…" disabled>
-            </div>
-
-            <div class="form-field">
-                <label class="form-label" for="entryVisibility">Visibility</label>
-                <select class="form-input form-select" id="entryVisibility" disabled>
-                    <option value="">Select visibility…</option>
-                    <option value="public">Public</option>
-                    <option value="collaborators">Collaborators only</option>
-                    <option value="private">Private</option>
-                </select>
-            </div>
-
-            <!-- Skeleton notice -->
-            <div class="form-skeleton-notice">
-                <span>✦</span> Full form fields coming in a future build.
-            </div>
+            <!-- Type-specific fields injected here -->
+            <div id="createFormFields"></div>
 
             <!-- Actions -->
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" id="createCancelBtn">Cancel</button>
-                <button type="submit" class="btn" disabled>Save Entry</button>
+                <button type="submit" class="btn" id="createSubmitBtn">Save Entry</button>
             </div>
 
         </form>
     </div>
+
 
 </main>

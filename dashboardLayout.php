@@ -10,13 +10,10 @@
     <link rel="stylesheet" href="css/dashboard-styles.css">
     <link rel="stylesheet" href="css/dashboard-archives.css">
     <link rel="stylesheet" href="css/dashboard-create.css">
+    <link rel="stylesheet" href="css/form-character.css">
+    <link rel="stylesheet" href="css/modal-picker.css">
 </head>
 <body>
-
-    <!-- Circular corner accents (Trinity signature) -->
-    <div class="corner-accent top-left"></div>
-    <div class="corner-accent bottom-right"></div>
-
     <!-- Sidebar Backdrop -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
@@ -89,6 +86,9 @@
 
     </div><!-- /.page-wrapper -->
 
+    <div id="pickerModalContainer"></div>
+
     <script src="js/dashboard-script.js"></script>
+    <script src="js/picker-modal.js"></script>
 </body>
 </html>
