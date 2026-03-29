@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Trinity – Creator Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Base styles -->
     <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Authentication and user management styles (if separate) -->
     <link rel="stylesheet" href="css/dashboard-layout.css">
     <link rel="stylesheet" href="css/dashboard-styles.css">
     <link rel="stylesheet" href="css/dashboard-archives.css">
     <link rel="stylesheet" href="css/dashboard-create.css">
+
+    <!-- Content Form and modal styles -->
     <link rel="stylesheet" href="css/form-character.css">
     <link rel="stylesheet" href="css/modal-picker.css">
 </head>

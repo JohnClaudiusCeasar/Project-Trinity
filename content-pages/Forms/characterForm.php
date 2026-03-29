@@ -14,8 +14,8 @@
     </div>
 
     <div class="form-field">
-        <label class="form-label" for="charName">Nickname</label>
-        <input class="form-input" type="text" id="charName" name="charName"
+        <label class="form-label" for="charNickname">Nickname</label>
+        <input class="form-input" type="text" id="charNickname" name="charNickname"
                placeholder="Alternative name that the character referred to as…">
     </div>
 
@@ -58,13 +58,18 @@
             <div class="picker-chips" id="charWorldChips"></div>
             <button type="button" class="picker-trigger" data-picker="world"
                     data-target-chips="charWorldChips"
-                    data-target-hidden="charWorldHidden">
+                    data-target-hidden="charWorldHidden"
+                    data-target-relations="charWorldRelations">
                 <span class="picker-trigger-icon">⬡</span>
                 <span class="picker-trigger-label">Select worlds…</span>
             </button>
         </div>
         <input type="hidden" id="charWorldHidden" name="charWorld">
     </div>
+
+    <!-- World Relation Cards — injected dynamically by picker-modal.js -->
+    <div class="world-relations" id="charWorldRelations"></div>
+
 </div>
 
 <!-- ── Section: Profile ── -->
