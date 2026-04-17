@@ -154,6 +154,7 @@
 .profile-name {
     font-weight: 700;
     font-size: 0.9rem;
+    font-weight: 900;
 }
 
 .profile-role {
@@ -263,6 +264,14 @@
     gap: 1rem;
     border-left: 2px solid var(--primary, #000);
     padding-left: 2rem;
+}
+
+.user-menu span {
+    font-weight: 400;
+}
+
+.username-display {
+    font-weight: 900;
 }
 
 /* ============================================

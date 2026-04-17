@@ -70,9 +70,9 @@ $initial = strtoupper(substr($username, 0, 1));
         <div class="sidebar-profile">
             <div class="sidebar-divider"></div>
             <div class="profile-card">
-                <div class="profile-avatar">H</div>
+                <div class="profile-avatar"><?php echo htmlspecialchars($initial); ?></div>
                 <div class="profile-info">
-                    <div class="profile-name">Horace</div>
+                    <div class="profile-name"><?php echo htmlspecialchars($username); ?></div>
                     <div class="profile-role">Creator</div>
                 </div>
                 <a href="index.html" class="profile-logout" title="Log out">⏻</a>
@@ -95,8 +95,8 @@ $initial = strtoupper(substr($username, 0, 1));
                 <a href="#guides" class="header-nav-item" data-page="guides">Guides</a>
             </nav>
             <div class="user-menu">
-                <span>Welcome, Creator</span>
-                <div class="avatar">H</div>
+                <span>Welcome, <span class="username-display"><?php echo htmlspecialchars($username); ?></span></span>
+                <div class="avatar"><?php echo htmlspecialchars($initial); ?></div>
             </div>
         </header>
 

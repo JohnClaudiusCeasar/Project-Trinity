@@ -169,8 +169,8 @@ const CREATE_TYPE_META = {
 // ------------------------------------------------------------
 const CREATE_FORM_ROUTES = {
     character: 'content-pages/Forms/characterForm.php',
+    world:     'content-pages/Forms/worldForm.php',
     // story:  'content-pages/Dashboard/dashboardCreate-story.php',
-    // world:  'content-pages/Dashboard/dashboardCreate-world.php',
     // object: 'content-pages/Dashboard/dashboardCreate-object.php',
 };
 
