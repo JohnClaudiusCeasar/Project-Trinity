@@ -9,15 +9,9 @@ select database();
 CREATE DATABASE IF NOT EXISTS trinity_db;
 
 USE trinity_db;
-
-SHOW TABLE STATUS WHERE Name IN ('users', 'world_types', 'equipment_types');
-
 -- ============================================================================
--- TIER 1: INDEPENDENT TABLES (no foreign key dependencies)
+-- INDEPENDENT TABLES (no foreign key dependencies)
 -- ============================================================================
-
--- Drop the users table (this will delete any data!)
-DROP TABLE IF EXISTS users;
 
 -- Recreate with INT UNSIGNED
 CREATE TABLE IF NOT EXISTS users (
@@ -27,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(200) NOT NULL,
     creator_id VARCHAR(20) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB;
 
 -- Optional: Create an index on creator_id for faster lookups
 CREATE INDEX IF NOT EXISTS idx_creator_id ON users(creator_id);
@@ -36,13 +30,21 @@ CREATE INDEX IF NOT EXISTS idx_creator_id ON users(creator_id);
 CREATE TABLE IF NOT EXISTS world_types (
     id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
-);
+) ENGINE=InnoDB;
 
 -- Create equipment_types lookup table
 CREATE TABLE IF NOT EXISTS equipment_types (
     id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
-);
+) ENGINE=InnoDB;
+
+-- ============================================================================
+-- SEED USER: Insert default user (John-Trinity)
+-- ============================================================================
+
+-- Insert a test user (John-Trinity)
+INSERT INTO users (username, email, password, creator_id) VALUES
+('John-Trinity', 'john@trinity.com', '$2y$10$dummyhashfordevelopment123', 'JT001');
 
 -- ============================================================================
 -- TIER 2: FIRST-LEVEL DEPENDENT TABLES (depend on users + type tables)
@@ -97,6 +99,17 @@ CREATE TABLE IF NOT EXISTS characters (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
+-- ADD FACTIONS LOOKUP TABLE
+-- ============================================================================
+ 
+CREATE TABLE IF NOT EXISTS factions (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ============================================================================
 -- TIER 4: JOIN TABLES (many-to-many relationships)
 -- ============================================================================
 
@@ -134,6 +147,11 @@ INSERT IGNORE INTO world_types (name) VALUES
 ('Sci-Fi'),
 ('Modern'),
 ('Historical'),
+('Post-Apocalyptic'),
+('Cyberpunk'),
+('Steampunk'),
+('Horror'),
+('Mystery'),
 ('Other');
 
 -- Insert default equipment types
@@ -143,7 +161,44 @@ INSERT IGNORE INTO equipment_types (name) VALUES
 ('Accessory'),
 ('Tool'),
 ('Consumable'),
+('Artifact'),
+('Vehicle'),
 ('Other');
+
+-- Insert Factions
+INSERT IGNORE INTO factions (name, description) VALUES
+('The Veil Accord', 'A secretive organization that maintains balance between realms'),
+('Order of the Ashen Mark', 'Ancient warriors dedicated to protecting the forgotten'),
+('The Hollow Collective', 'A network of information brokers and shadow operatives'),
+('Freelance / Independent', 'Operates without formal allegiance'),
+('Unaffiliated', 'No known faction ties');
+
+-- ============================================================================
+-- SEED SAMPLE WORLDS 
+-- ============================================================================
+ 
+-- Note: created_by uses the existing user ID. Adjust if your user has a different ID.
+ 
+INSERT INTO worlds (name, type_id, description, created_by) VALUES
+('Aethermoor', 1, 'A floating archipelago where islands drift through perpetual twilight, connected by shimmering bridges of solidified starlight.', 1),
+('Nexus Prime', 2, 'A megacity sprawling across three moons, where corporate towers pierce the atmosphere and neon lights never fade.', 1),
+('The Fractured Realm', 1, 'A world shattered by an ancient cataclysm, its fragments held together by mysterious threads of magic.', 1),
+('New Tokyo 2087', 6, 'A neon-soaked metropolis where augmented humans navigate corporate warfare and underground resistance.', 1),
+('The Ashen Wastes', 5, 'Endless dunes of gray sand beneath a dying sun, dotted with the ruins of a civilization that forgot its name.', 1);
+
+-- ============================================================================
+-- SEED SAMPLE EQUIPMENT 
+-- ============================================================================
+ 
+INSERT INTO equipment (name, type_id, description, created_by) VALUES
+('Voidblade', 1, 'A sword forged from crystallized shadow, capable of cutting through reality itself.', 1),
+('Chrono Gauntlet', 3, 'A wrist-mounted device that allows brief manipulation of local time flow.', 1),
+('Wanderer\'s Cloak', 2, 'An enchanted cloak that shifts its appearance to match any environment.', 1),
+('Memory Shard', 6, 'A glowing crystal that stores and replays fragments of the past.', 1),
+('Neural Interface Implant', 3, 'A cybernetic enhancement allowing direct connection to digital networks.', 1),
+('Phoenix Elixir', 5, 'A rare potion that can revive the user from mortal wounds once.', 1),
+('Grappling Hook Gun', 4, 'A compact launcher with retractable cables for urban traversal.', 1),
+('The Codex of Whispers', 6, 'An ancient tome that writes itself, revealing secrets to those who listen.', 1);
 
 -- ============================================================================
 -- END OF SCHEMA
