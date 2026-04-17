@@ -301,6 +301,11 @@
     font-family: 'Inria Sans', sans-serif;
 }
 
+.tag-chip.round,
+.tags-round + .tags-list .tag-chip {
+    border-radius: 20px;
+}
+
 .tag-remove {
     background: none;
     border: none;

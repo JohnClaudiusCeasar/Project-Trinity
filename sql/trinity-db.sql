@@ -56,6 +56,14 @@ CREATE TABLE IF NOT EXISTS worlds (
     name VARCHAR(100) NOT NULL,
     type_id TINYINT UNSIGNED NULL,
     description TEXT NULL,
+    location VARCHAR(100) NULL,
+    era VARCHAR(100) NULL,
+    government VARCHAR(100) NULL,
+    population INT UNSIGNED NULL,
+    language VARCHAR(100) NULL,
+    religion VARCHAR(100) NULL,
+    currency VARCHAR(100) NULL,
+    tags VARCHAR(255) NULL,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -199,6 +207,51 @@ INSERT INTO equipment (name, type_id, description, created_by) VALUES
 ('Phoenix Elixir', 5, 'A rare potion that can revive the user from mortal wounds once.', 1),
 ('Grappling Hook Gun', 4, 'A compact launcher with retractable cables for urban traversal.', 1),
 ('The Codex of Whispers', 6, 'An ancient tome that writes itself, revealing secrets to those who listen.', 1);
+
+-- ============================================================================
+-- STORIES TABLE
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS stories (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    genre VARCHAR(100) NULL,
+    synopsis TEXT NULL,
+    status ENUM('wip','finished','cancelled') DEFAULT 'wip',
+    entry_content LONGTEXT NULL,
+    author VARCHAR(100) NULL,
+    word_count INT UNSIGNED DEFAULT 0,
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Story relations junction tables
+CREATE TABLE IF NOT EXISTS story_character (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    story_id INT UNSIGNED NOT NULL,
+    character_id INT UNSIGNED NOT NULL,
+    role VARCHAR(100) NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_story_character (story_id, character_id),
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE,
+    FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS story_world (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    story_id INT UNSIGNED NOT NULL,
+    world_id INT UNSIGNED NOT NULL,
+    role VARCHAR(100) NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_story_world (story_id, world_id),
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE,
+    FOREIGN KEY (world_id) REFERENCES worlds(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- TODO: story_equipment relation (equipment/artifacts picker for stories)
+-- Will be added when equipment picker supports story relations
 
 -- ============================================================================
 -- END OF SCHEMA

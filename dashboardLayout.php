@@ -30,6 +30,7 @@ $initial = strtoupper(substr($username, 0, 1));
 
     <!-- Content Form and modal styles -->
     <link rel="stylesheet" href="css/form-character.css">
+    <link rel="stylesheet" href="css/form-story.css">
     <link rel="stylesheet" href="css/modal-picker.css">
 </head>
 <body>

@@ -65,6 +65,19 @@ try {
         }
     }
 
+    if ($category === 'all' || $category === 'story') {
+        $stmt = $pdo->prepare('SELECT id, title, created_at FROM stories WHERE created_by = ? ORDER BY created_at DESC');
+        $stmt->execute([$user_id]);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $entries[] = [
+                'id' => (int)$row['id'],
+                'type' => 'story',
+                'name' => $row['title'],
+                'created_at' => $row['created_at']
+            ];
+        }
+    }
+
     usort($entries, function($a, $b) {
         return strtotime($b['created_at']) - strtotime($a['created_at']);
     });

@@ -171,9 +171,9 @@ const CREATE_TYPE_META = {
 // Add a new entry here when a new type form is created.
 // ------------------------------------------------------------
 const CREATE_FORM_ROUTES = {
+    story:     'content-pages/Forms/storyForm.php',
     character: 'content-pages/Forms/characterForm.php',
     world:     'content-pages/Forms/worldForm.php',
-    // story:  'content-pages/Dashboard/dashboardCreate-story.php',
     // object: 'content-pages/Dashboard/dashboardCreate-object.php',
 };
 
@@ -254,6 +254,68 @@ function initTagsInputs() {
 }
 
 // ------------------------------------------------------------
+// SEGMENTED CONTROL (Status Toggle)
+// ------------------------------------------------------------
+function initSegmentedControl() {
+    document.querySelectorAll('.segmented-control').forEach(control => {
+        const buttons = control.querySelectorAll('.segment-btn');
+        const hiddenInput = control.parentElement.querySelector('input[type="hidden"]') ||
+                          document.getElementById(control.id.replace('Field', ''));
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                if (hiddenInput) {
+                    hiddenInput.value = btn.dataset.value;
+                }
+            });
+        });
+    });
+}
+
+// ------------------------------------------------------------
+// RICH TEXT EDITOR
+// ------------------------------------------------------------
+function initRichTextEditor() {
+    document.querySelectorAll('.rich-text-editor').forEach(editor => {
+        const content = editor.querySelector('.rte-content');
+        const hiddenInput = editor.parentElement.querySelector('input[type="hidden"]');
+        const toolbar = editor.querySelector('.rte-toolbar');
+        const wordCountEl = editor.parentElement.querySelector('.rte-wordcount span');
+
+        if (!content) return;
+
+        toolbar?.querySelectorAll('.rte-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const command = btn.dataset.command;
+                document.execCommand(command, false, null);
+                content.focus();
+            });
+        });
+
+        content.addEventListener('input', () => {
+            if (hiddenInput) {
+                hiddenInput.value = content.innerHTML;
+            }
+            if (wordCountEl) {
+                const text = content.innerText || '';
+                const words = text.trim() ? text.trim().split(/\s+/) : [];
+                wordCountEl.textContent = words.length;
+            }
+        });
+
+        content.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
+    });
+}
+
+// ------------------------------------------------------------
 // FORM SUBMISSION HANDLER
 // ------------------------------------------------------------
 function initFormSubmission(type) {
@@ -273,6 +335,16 @@ function initFormSubmission(type) {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Saving...';
         }
+
+        // Handle rich text editor hidden inputs before submission
+        document.querySelectorAll('.rich-text-editor').forEach(editor => {
+            const content = editor.querySelector('.rte-content');
+            const hiddenInput = editor.parentElement.querySelector('input[type="hidden"]');
+            if (content && hiddenInput) {
+                hiddenInput.name = hiddenInput.id.replace('Hidden', '');
+                formData.set(hiddenInput.name, content.innerHTML);
+            }
+        });
 
         const formData = new FormData(form);
         formData.append('type', type);
@@ -354,6 +426,12 @@ function initCreatePage() {
                 initTagsInputs();
                 initPickerTriggers();
                 initFormSubmission(type);
+
+                // Story-specific initializations
+                if (type === 'story') {
+                    initSegmentedControl();
+                    initRichTextEditor();
+                }
             }
         });
     });

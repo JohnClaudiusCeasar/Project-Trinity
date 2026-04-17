@@ -1,0 +1,189 @@
+/* --- Story Form Specific Styles --- */
+
+/* --- Segmented Control (Status Toggle) --- */
+.segmented-control {
+    display: flex;
+    gap: 0;
+    border: 2px solid var(--primary, #000);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--secondary, #fff);
+}
+
+.segment-btn {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--primary, #000);
+    cursor: pointer;
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary, #000);
+    transition: background 0.15s ease, color 0.15s ease;
+    outline: none;
+}
+
+.segment-btn:last-child {
+    border-right: none;
+}
+
+.segment-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.segment-btn.active {
+    background: var(--primary, #000);
+    color: var(--secondary, #fff);
+}
+
+/* --- Rich Text Editor --- */
+.rich-text-editor {
+    border: 2px solid var(--primary, #000);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--secondary, #fff);
+}
+
+.rte-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: #f5f5f5;
+    border-bottom: 1px solid var(--primary, #000);
+}
+
+.rte-btn {
+    padding: 0.35rem 0.6rem;
+    background: var(--secondary, #fff);
+    border: 1px solid var(--primary, #000);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary, #000);
+    transition: all 0.15s ease;
+    outline: none;
+    min-width: 32px;
+}
+
+.rte-btn:hover {
+    background: var(--primary, #000);
+    color: var(--secondary, #fff);
+}
+
+.rte-btn:active {
+    background: var(--primary, #000);
+    color: var(--secondary, #fff);
+}
+
+.rte-separator {
+    display: flex;
+    align-items: center;
+    color: #ccc;
+    padding: 0 0.25rem;
+    font-size: 0.9rem;
+}
+
+.rte-content {
+    min-height: 300px;
+    padding: 1rem;
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--primary, #000);
+    outline: none;
+}
+
+.rte-content:empty:before {
+    content: attr(placeholder);
+    color: #999;
+    pointer-events: none;
+}
+
+.rte-content:focus {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.rte-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 1.5rem 0 0.5rem;
+    border-bottom: 2px solid var(--primary, #000);
+    padding-bottom: 0.25rem;
+}
+
+.rte-content h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 1.25rem 0 0.5rem;
+}
+
+.rte-content ul,
+.rte-content ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.rte-content li {
+    margin: 0.25rem 0;
+}
+
+.rte-content blockquote {
+    margin: 1rem 0;
+    padding-left: 1rem;
+    border-left: 4px solid var(--primary, #000);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.rte-wordcount {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+    text-align: right;
+}
+
+/* --- Round-Edged Tags Input --- */
+.tags-round {
+    border-radius: 20px !important;
+}
+
+.tags-round + .tags-list .tag-chip {
+    border-radius: 20px;
+}
+
+/* --- Form Hint --- */
+.form-hint {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    .segmented-control {
+        flex-wrap: wrap;
+    }
+
+    .segment-btn {
+        flex: 1 1 calc(33.333% - 2px);
+        min-width: calc(33.333% - 2px);
+    }
+
+    .rte-content {
+        min-height: 200px;
+    }
+
+    .rte-toolbar {
+        gap: 0.25rem;
+    }
+
+    .rte-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
