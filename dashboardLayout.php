@@ -1,3 +1,16 @@
+<?php
+session_start();
+
+// Auth check - redirect to login if not logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.html');
+    exit();
+}
+
+$username = $_SESSION['username'] ?? 'Creator';
+$initial = strtoupper(substr($username, 0, 1));
+?>
+
 <!DOCTYPE html>
 <html>
 <head>

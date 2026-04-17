@@ -81,24 +81,41 @@
     padding-right: 1rem;
 }
 
+/* --- Split Layout: Hero + Form Side-by-Side --- */
+.create-main.is-form-active {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 5vw;
+    padding: 0 2rem;
+}
+
+.create-main.is-form-active .dashboard-hero {
+    flex: 0 0 320px;
+    position: sticky;
+    top: 120px; /* Aligns with header height */
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.create-main.is-form-active .dashboard-hero h1 {
+    font-size: 2.5rem;
+}
+
+.create-main.is-form-active .create-form-wrapper {
+    flex: 1;
+    max-width: 800px;
+    padding: 0;
+    height: auto;
+    overflow-y: visible;
+}
+
 .create-form-wrapper.visible {
     display: block;
 }
 
-.create-form-wrapper::-webkit-scrollbar {
-    width: 4px;
-}
-
-.create-form-wrapper::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.create-form-wrapper::-webkit-scrollbar-thumb {
-    background: var(--primary, #000);
-    opacity: 0.3;
-}
-
 /* --- Back Button --- */
+
 .create-back-btn {
     display: inline-flex;
     align-items: center;
@@ -321,6 +338,18 @@
 }
 
 /* --- Responsive --- */
+@media (max-width: 1024px) {
+    .create-main.is-form-active {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .create-main.is-form-active .dashboard-hero {
+        flex: none;
+        position: static;
+        width: 100%;
+    }
+}
+
 @media (max-width: 600px) {
     .create-type-grid {
         grid-template-columns: 1fr;

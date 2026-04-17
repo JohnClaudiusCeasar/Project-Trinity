@@ -193,15 +193,12 @@ function initializeTabNavigation() {
  * Handle keyboard events
  */
 document.addEventListener('keydown', function(event) {
-    // Allow Enter key on email field to submit form
     if (event.key === 'Enter') {
-        const emailField = document.getElementById('email');
-        if (document.activeElement === emailField) {
+        const registerForm = document.getElementById('registerForm');
+        const activeElement = document.activeElement;
+        if (registerForm && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
             event.preventDefault();
-            const registerForm = document.getElementById('registerForm');
-            if (registerForm) {
-                registerForm.dispatchEvent(new Event('submit'));
-            }
+            registerForm.dispatchEvent(new Event('submit'));
         }
     }
 });

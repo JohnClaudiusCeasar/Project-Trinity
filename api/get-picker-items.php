@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0); 
 
 // Database connection
-require_once 'db-connect.php'; 
+require_once 'db_connect.php'; 
 
 // Get the type parameter
 $type = $_GET['type'] ?? '';

@@ -271,6 +271,9 @@ function initCreatePage() {
             if (formIcon)  formIcon.textContent  = meta.icon;
             if (formLabel) formLabel.textContent = meta.label;
 
+            const mainContainer = document.querySelector('.create-main');
+            if (mainContainer) mainContainer.classList.add('is-form-active');
+
             picker.style.display = 'none';
             formWrapper.classList.add('visible');
 
@@ -284,6 +287,9 @@ function initCreatePage() {
     });
 
     function returnToPicker() {
+        const mainContainer = document.querySelector('.create-main');
+        if (mainContainer) mainContainer.classList.remove('is-form-active');
+
         formWrapper.classList.remove('visible');
         picker.style.display = '';
         if (formFields) formFields.innerHTML = '';
