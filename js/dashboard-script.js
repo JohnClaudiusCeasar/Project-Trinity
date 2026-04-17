@@ -11,7 +11,7 @@
 const NAV_ROUTES = {
     archives: { type: 'fetch', src: 'content-pages/Dashboard/dashboardArchive.php' },
     create:   { type: 'fetch', src: 'content-pages/Dashboard/dashboardCreate.php'  },
-    view:     { type: 'placeholder', label: 'View'     },
+    view:     { type: 'fetch', src: 'content-pages/Dashboard/dashboardView.php'     },
     projects: { type: 'placeholder', label: 'Projects' },
     explore:  { type: 'placeholder', label: 'Explore'  },
     guides:   { type: 'placeholder', label: 'Guides'   },
@@ -46,6 +46,9 @@ async function loadPage(pageKey) {
             main.innerHTML = await res.text();
             initDashboardFeatures();
             initCreatePage();
+            if (pageKey === 'view') {
+                initViewPage();
+            }
         } catch (err) {
             console.error(err);
             main.innerHTML = buildPlaceholder(pageKey);
@@ -251,6 +254,74 @@ function initTagsInputs() {
 }
 
 // ------------------------------------------------------------
+// FORM SUBMISSION HANDLER
+// ------------------------------------------------------------
+function initFormSubmission(type) {
+    const form = document.getElementById('createForm');
+    if (!form) return;
+
+    const submitBtn = document.getElementById('createSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Entry';
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+        }
+
+        const formData = new FormData(form);
+        formData.append('type', type);
+
+        try {
+            const res = await fetch(`php/${type}-process.php`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert('Entry created successfully!');
+                returnToPicker();
+                setActiveNav('view');
+                loadPage('view');
+            } else {
+                if (data.errors && Array.isArray(data.errors)) {
+                    alert('Please fix the following:\n' + data.errors.join('\n'));
+                } else {
+                    alert(data.message || 'Failed to create entry');
+                }
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            alert('An error occurred. Please try again.');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Entry';
+            }
+        }
+    });
+}
+
+function returnToPicker() {
+    const picker = document.getElementById('createPicker');
+    const formWrapper = document.getElementById('createFormWrapper');
+    const formFields = document.getElementById('createFormFields');
+    const mainContainer = document.querySelector('.create-main');
+    if (mainContainer) mainContainer.classList.remove('is-form-active');
+
+    formWrapper?.classList.remove('visible');
+    if (picker) picker.style.display = '';
+    if (formFields) formFields.innerHTML = '';
+}
+
+// ------------------------------------------------------------
 // INIT CREATE PAGE
 // ------------------------------------------------------------
 function initCreatePage() {
@@ -281,22 +352,172 @@ function initCreatePage() {
             if (formFields) {
                 await loadFormFragment(type, formFields);
                 initTagsInputs();
-                initPickerTriggers();   // defined in picker-modal.js
+                initPickerTriggers();
+                initFormSubmission(type);
             }
         });
     });
 
-    function returnToPicker() {
-        const mainContainer = document.querySelector('.create-main');
-        if (mainContainer) mainContainer.classList.remove('is-form-active');
-
-        formWrapper.classList.remove('visible');
-        picker.style.display = '';
-        if (formFields) formFields.innerHTML = '';
-    }
-
     backBtn?.addEventListener('click', returnToPicker);
     cancelBtn?.addEventListener('click', returnToPicker);
+}
+
+// ------------------------------------------------------------
+// INIT VIEW PAGE
+// ------------------------------------------------------------
+async function initViewPage() {
+    const entryList = document.getElementById('viewEntryList');
+    if (!entryList) return;
+
+    const filterBtns = document.querySelectorAll('#viewEntryList ~ .filter-container .filter-btn, .filter-container .filter-btn');
+    
+    async function loadEntries(category = 'all') {
+        entryList.innerHTML = '<div class="loading-state">Loading entries...</div>';
+        
+        try {
+            const url = category === 'all' ? 'api/get-entries.php' : `api/get-entries.php?category=${category}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            if (data.success && data.entries && data.entries.length > 0) {
+                entryList.innerHTML = data.entries.map(entry => `
+                    <div class="entry-item" data-category="${entry.type}" data-id="${entry.id}" data-type="${entry.type}">
+                        <div class="entry-content">
+                            <div class="entry-title">${escapeHtml(entry.name)}</div>
+                            <div class="entry-meta">Created ${formatDate(entry.created_at)}</div>
+                        </div>
+                        <div class="entry-actions">
+                            <button class="entry-action-btn view-btn" title="View full document" data-id="${entry.id}" data-type="${entry.type}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                            <button class="entry-action-btn edit-btn" title="Edit" data-id="${entry.id}" data-type="${entry.type}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </button>
+                            <button class="entry-action-btn delete-btn" title="Delete" data-id="${entry.id}" data-type="${entry.type}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                initEntryActions();
+            } else {
+                entryList.innerHTML = '<p class="empty-state">No entries yet. Create your first entry!</p>';
+            }
+        } catch (err) {
+            console.error('Error loading entries:', err);
+            entryList.innerHTML = '<p class="empty-state">Failed to load entries. Please try again.</p>';
+        }
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const category = btn.dataset.category || 'all';
+            loadEntries(category);
+        });
+    });
+
+    loadEntries();
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return `${Math.floor(diffDays / 365)} years ago`;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ------------------------------------------------------------
+// ENTRY ACTIONS HANDLERS
+// ------------------------------------------------------------
+function initEntryActions() {
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            alert('View feature coming soon');
+        });
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            alert('Edit feature coming soon');
+        });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            const type = btn.dataset.type;
+            showDeleteConfirm(id, type);
+        });
+    });
+}
+
+function showDeleteConfirm(id, type) {
+    const modal = document.getElementById('confirmModal');
+    const backdrop = document.getElementById('confirmModalBackdrop');
+    const message = document.getElementById('confirmModalMessage');
+    const confirmBtn = document.getElementById('confirmModalConfirm');
+
+    if (!modal || !backdrop || !message || !confirmBtn) {
+        console.error('Confirm modal elements not found');
+        return;
+    }
+
+    message.textContent = `Are you sure you want to delete this ${type}? This action cannot be undone.`;
+
+    modal.classList.add('visible');
+    backdrop.classList.add('visible');
+
+    const handleConfirm = () => {
+        console.log(`Delete ${type} with id ${id}`);
+        closeConfirmModal();
+    };
+
+    const closeHandler = () => {
+        closeConfirmModal();
+        confirmBtn.removeEventListener('click', handleConfirm);
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    document.getElementById('confirmModalClose')?.addEventListener('click', closeHandler);
+    document.getElementById('confirmModalCancel')?.addEventListener('click', closeHandler);
+    backdrop.addEventListener('click', closeHandler);
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    const backdrop = document.getElementById('confirmModalBackdrop');
+    if (modal) modal.classList.remove('visible');
+    if (backdrop) backdrop.classList.remove('visible');
 }
 
 // ------------------------------------------------------------
