@@ -296,6 +296,36 @@ function initRichTextEditor() {
             });
         });
 
+        content.addEventListener('keydown', (e) => {
+            if (e.key === '"') {
+                e.preventDefault();
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const container = range.startContainer;
+                    const offset = range.startOffset;
+                    
+                    if (container.nodeType !== 3) return;
+                    
+                    container.insertData(offset, '""');
+                    range.setStart(container, offset + 1);
+                    range.setEnd(container, offset + 1);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            }
+        });
+
+        content.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Tab') {
+                checkQuoteExit(content, hiddenInput);
+            }
+        });
+
+        content.addEventListener('click', () => {
+            checkQuoteExit(content, hiddenInput);
+        });
+
         content.addEventListener('input', () => {
             if (hiddenInput) {
                 hiddenInput.value = content.innerHTML;
@@ -313,6 +343,50 @@ function initRichTextEditor() {
             document.execCommand('insertText', false, text);
         });
     });
+}
+
+function checkQuoteExit(content, hiddenInput) {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const container = range.startContainer;
+    const offset = range.startOffset;
+
+    if (container.nodeType !== 3) return;
+
+    const text = container.textContent;
+    const beforeCursor = text.substring(0, offset);
+    const afterCursor = text.substring(offset);
+
+    const closeQuoteIdx = afterCursor.indexOf('"');
+    const openQuoteIdx = beforeCursor.lastIndexOf('"');
+
+    if (openQuoteIdx !== -1 && closeQuoteIdx !== -1) {
+        const textBetween = text.substring(openQuoteIdx + 1, offset + closeQuoteIdx);
+        if (textBetween.length > 0) {
+            const rangeStart = document.createRange();
+            
+            try {
+                rangeStart.setStart(container, openQuoteIdx);
+                rangeStart.setEnd(container, openQuoteIdx + closeQuoteIdx + 2);
+                rangeStart.surroundContents(document.createElement('em'));
+            } catch (e) {
+                const before = text.substring(0, openQuoteIdx);
+                const middle = textBetween;
+                const after = text.substring(openQuoteIdx + closeQuoteIdx + 2);
+                container.textContent = before + middle + after;
+                
+                const em = document.createElement('em');
+                em.textContent = middle;
+                container.parentNode.insertBefore(em, container.nextSibling);
+            }
+
+            if (hiddenInput) {
+                hiddenInput.value = content.innerHTML;
+            }
+        }
+    }
 }
 
 // ------------------------------------------------------------
@@ -449,46 +523,16 @@ async function initViewPage() {
 
     const filterBtns = document.querySelectorAll('#viewEntryList ~ .filter-container .filter-btn, .filter-container .filter-btn');
     
-    async function loadEntries(category = 'all') {
+async function loadEntries(category = 'all') {
         entryList.innerHTML = '<div class="loading-state">Loading entries...</div>';
         
         try {
-            const url = category === 'all' ? 'api/get-entries.php' : `api/get-entries.php?category=${category}`;
+            const url = category === 'all' ? 'api/get-entries-html.php' : `api/get-entries-html.php?category=${category}`;
             const res = await fetch(url);
-            const data = await res.json();
+            const html = await res.text();
             
-            if (data.success && data.entries && data.entries.length > 0) {
-                entryList.innerHTML = data.entries.map(entry => `
-                    <div class="entry-item" data-category="${entry.type}" data-id="${entry.id}" data-type="${entry.type}">
-                        <div class="entry-content">
-                            <div class="entry-title">${escapeHtml(entry.name)}</div>
-                            <div class="entry-meta">Created ${formatDate(entry.created_at)}</div>
-                        </div>
-                        <div class="entry-actions">
-                            <button class="entry-action-btn view-btn" title="View full document" data-id="${entry.id}" data-type="${entry.type}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-                                </svg>
-                            </button>
-                            <button class="entry-action-btn edit-btn" title="Edit" data-id="${entry.id}" data-type="${entry.type}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                </svg>
-                            </button>
-                            <button class="entry-action-btn delete-btn" title="Delete" data-id="${entry.id}" data-type="${entry.type}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6"/>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                    <line x1="10" y1="11" x2="10" y2="17"/>
-                                    <line x1="14" y1="11" x2="14" y2="17"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-
+            if (html.trim()) {
+                entryList.innerHTML = html;
                 initEntryActions();
             } else {
                 entryList.innerHTML = '<p class="empty-state">No entries yet. Create your first entry!</p>';

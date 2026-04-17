@@ -32,6 +32,7 @@ $initial = strtoupper(substr($username, 0, 1));
     <link rel="stylesheet" href="css/form-character.css">
     <link rel="stylesheet" href="css/form-story.css">
     <link rel="stylesheet" href="css/modal-picker.css">
+    <link rel="stylesheet" href="css/entry-card.css">
 </head>
 <body>
     <!-- Sidebar Backdrop -->

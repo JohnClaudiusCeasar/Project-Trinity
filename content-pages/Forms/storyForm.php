@@ -123,21 +123,9 @@
                 <button type="button" class="rte-btn" data-command="underline" title="Underline">
                     <u>U</u>
                 </button>
-                <span class="rte-separator">|</span>
-                <button type="button" class="rte-btn" data-command="h2" title="Heading">H2</button>
-                <button type="button" class="rte-btn" data-command="h3" title="Subheading">H3</button>
-                <span class="rte-separator">|</span>
-                <button type="button" class="rte-btn" data-command="ul" title="Bullet List">
-                    <span style="font-size: 0.85rem;">• List</span>
-                </button>
-                <button type="button" class="rte-btn" data-command="ol" title="Numbered List">
-                    <span style="font-size: 0.85rem;">1. List</span>
-                </button>
-                <span class="rte-separator">|</span>
-                <button type="button" class="rte-btn" data-command="quote" title="Quote">"</button>
             </div>
-            <div class="rte-content" id="storyEntry" contenteditable="true"
-                 placeholder="Write your story here…"></div>
+<div class="rte-content" id="storyEntry" contenteditable="true"
+                  placeholder="Write your story here…" spellcheck="true"></div>
         </div>
         <input type="hidden" id="storyEntryHidden" name="storyEntry">
         <div class="rte-wordcount">
