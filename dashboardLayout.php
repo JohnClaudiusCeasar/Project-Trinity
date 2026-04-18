@@ -33,6 +33,7 @@ $initial = strtoupper(substr($username, 0, 1));
     <link rel="stylesheet" href="css/form-story.css">
     <link rel="stylesheet" href="css/modal-picker.css">
     <link rel="stylesheet" href="css/entry-card.css">
+    <link rel="stylesheet" href="css/dashboard-profile.css">
 </head>
 <body>
     <!-- Sidebar Backdrop -->
@@ -98,7 +99,7 @@ $initial = strtoupper(substr($username, 0, 1));
             </nav>
             <div class="user-menu">
                 <span>Welcome, <span class="username-display"><?php echo htmlspecialchars($username); ?></span></span>
-                <div class="avatar"><?php echo htmlspecialchars($initial); ?></div>
+                <a href="#profile" class="header-avatar" data-page="profile"><?php echo htmlspecialchars($initial); ?></a>
             </div>
         </header>
 

@@ -12,6 +12,7 @@ const NAV_ROUTES = {
     archives: { type: 'fetch', src: 'content-pages/Dashboard/dashboardArchive.php' },
     create:   { type: 'fetch', src: 'content-pages/Dashboard/dashboardCreate.php'  },
     view:     { type: 'fetch', src: 'content-pages/Dashboard/dashboardView.php'     },
+    profile:  { type: 'fetch', src: 'content-pages/Dashboard/dashboardProfile.php'  },
     projects: { type: 'placeholder', label: 'Projects' },
     explore:  { type: 'placeholder', label: 'Explore'  },
     guides:   { type: 'placeholder', label: 'Guides'   },
