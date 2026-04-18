@@ -144,6 +144,12 @@
     font-weight: 700;
     font-size: 1rem;
     flex-shrink: 0;
+    transition: opacity 0.15s;
+    cursor: pointer;
+}
+
+.profile-avatar:hover {
+    opacity: 0.7;
 }
 
 .profile-info {
@@ -272,6 +278,27 @@
 
 .username-display {
     font-weight: 900;
+}
+
+.header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--creator-bg, #d9d9d9);
+    border: 2px solid var(--primary, #000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    color: var(--primary, #000);
+    transition: opacity 0.15s;
+    cursor: pointer;
+}
+
+.header-avatar:hover {
+    opacity: 0.7;
 }
 
 /* ============================================

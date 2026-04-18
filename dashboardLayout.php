@@ -73,7 +73,7 @@ $initial = strtoupper(substr($username, 0, 1));
         <div class="sidebar-profile">
             <div class="sidebar-divider"></div>
             <div class="profile-card">
-                <div class="profile-avatar"><?php echo htmlspecialchars($initial); ?></div>
+                <div class="profile-avatar" data-page="profile"><?php echo htmlspecialchars($initial); ?></div>
                 <div class="profile-info">
                     <div class="profile-name"><?php echo htmlspecialchars($username); ?></div>
                     <div class="profile-role">Creator</div>
