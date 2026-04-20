@@ -84,7 +84,7 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Registration successful',
-        'redirect' => 'login.html'
+        'redirect' => 'login.php'
     ]);
 } catch (PDOException $e) {
     http_response_code(500);

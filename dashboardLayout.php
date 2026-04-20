@@ -3,7 +3,7 @@ session_start();
 
 // Auth check - redirect to login if not logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.html');
+    header('Location: login.php');
     exit();
 }
 
@@ -78,7 +78,7 @@ $initial = strtoupper(substr($username, 0, 1));
                     <div class="profile-name"><?php echo htmlspecialchars($username); ?></div>
                     <div class="profile-role">Creator</div>
                 </div>
-                <a href="index.html" class="profile-logout" title="Log out">⏻</a>
+                <a href="index.php" class="profile-logout" title="Log out">⏻</a>
             </div>
         </div>
 
