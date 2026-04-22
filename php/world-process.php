@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $name        = trim($_POST['worldName'] ?? '');
+$type_id    = trim($_POST['worldType'] ?? '') ?: null;
 $description = trim($_POST['worldDescription'] ?? '');
 $location   = trim($_POST['worldLocation'] ?? '');
 $era        = trim($_POST['worldEra'] ?? '');
@@ -47,10 +48,11 @@ try {
     $pdo->beginTransaction();
 
     $stmt = $pdo->prepare('INSERT INTO worlds
-        (name, description, created_by, location, era, government, population, language, religion, currency, tags)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        (name, type_id, description, created_by, location, era, government, population, language, religion, currency, tags)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $name,
+        $type_id,
         $description ?: null,
         $_SESSION['user_id'],
         $location ?: null,

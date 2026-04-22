@@ -1,6 +1,17 @@
 <!-- World Form Fields -->
 <!-- Fetched dynamically by dashboard-script.js when type = 'world' -->
 
+<?php
+// Fetch world types for dropdown
+try {
+    require_once '../../php/db_connect.php';
+    $typesStmt = $pdo->query("SELECT id, name FROM world_types ORDER BY name");
+    $worldTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $worldTypes = [];
+}
+?>
+
 <!-- ── Section: Basic Information ── -->
 <div class="form-section">
     <div class="form-section-header">
@@ -11,6 +22,18 @@
         <label class="form-label" for="worldName">Name</label>
         <input class="form-input" type="text" id="worldName" name="worldName"
                placeholder="Name of the world, realm, or dimension…">
+    </div>
+
+    <div class="form-field">
+        <label class="form-label" for="worldType">Type</label>
+        <select class="form-input form-select" id="worldType" name="worldType">
+            <option value="">Select type…</option>
+            <?php foreach ($worldTypes as $type): ?>
+            <option value="<?php echo htmlspecialchars($type['id']); ?>">
+                <?php echo htmlspecialchars($type['name']); ?>
+            </option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
     <div class="form-field">

@@ -1,3 +1,9 @@
+-- ============================================================================
+-- Fresh Schema Refresh Script
+-- Purpose: Drop and recreate tables with correct schema
+-- Preserves: users table only
+-- ============================================================================
+
 USE trinity_db;
 
 -- ============================================================================
@@ -21,8 +27,9 @@ DROP TABLE IF EXISTS worlds;
 -- ============================================================================
 
 TRUNCATE TABLE factions;
-TRUNCATE TABLE world_types;
-TRUNCATE TABLE equipment_types;
+DROP TABLE IF EXISTS factions;
+DROP TABLE IF EXISTS world_types;
+DROP TABLE IF EXISTS equipment_types;
 
 -- ============================================================================
 -- STEP 4: Recreate worlds table (with type_id)
@@ -70,7 +77,28 @@ CREATE TABLE IF NOT EXISTS characters (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 6: Recreate stories table
+-- STEP 6: Recreate lookup tables
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS world_types (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS equipment_types (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS factions (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ============================================================================
+-- STEP 7: Recreate stories table
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS stories (
@@ -89,7 +117,7 @@ CREATE TABLE IF NOT EXISTS stories (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 7: Recreate junction tables
+-- STEP 8: Recreate junction tables
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS character_world (
@@ -127,7 +155,7 @@ CREATE TABLE IF NOT EXISTS story_world (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 8: Insert lookup seed data (for dropdowns)
+-- STEP 9: Insert lookup seed data (for dropdowns)
 -- ============================================================================
 
 INSERT IGNORE INTO world_types (name) VALUES
