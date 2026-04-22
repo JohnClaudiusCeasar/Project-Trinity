@@ -411,6 +411,8 @@ function initFormSubmission(type) {
             submitBtn.textContent = 'Saving...';
         }
 
+        const formData = new FormData(form);
+
         // Handle rich text editor hidden inputs before submission
         document.querySelectorAll('.rich-text-editor').forEach(editor => {
             const content = editor.querySelector('.rte-content');
@@ -421,7 +423,6 @@ function initFormSubmission(type) {
             }
         });
 
-        const formData = new FormData(form);
         formData.append('type', type);
 
         try {

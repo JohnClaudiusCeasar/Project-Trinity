@@ -49,7 +49,7 @@ try {
 
     $stmt = $pdo->prepare('INSERT INTO worlds
         (name, type_id, description, created_by, location, era, government, population, language, religion, currency, tags)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $name,
         $type_id,
