@@ -26,7 +26,7 @@ $entry       = $_POST['storyEntry'] ?? '';
 $tags        = trim($_POST['storyTags'] ?? '');
 $charactersJson = $_POST['storyCharacters'] ?? '';
 $worldsJson  = $_POST['storyWorlds'] ?? '';
-$artifactsJson = $_POST['storyArtifacts'] ?? '';
+$equipmentJson = $_POST['storyEquipment'] ?? '';
 
 $errors = [];
 
@@ -107,12 +107,17 @@ try {
         }
     }
 
-    // TODO: story_equipment relation (when equipment picker supports story relations)
-    if (!empty($artifactsJson)) {
-        $artifacts = json_decode($artifactsJson, true);
-        if (is_array($artifacts)) {
-            // Store for later when junction table is implemented
-            // $equipStmt = $pdo->prepare('INSERT INTO story_equipment ...');
+    // Link equipment (if any)
+    if (!empty($equipmentJson)) {
+        $equipmentIds = array_filter(array_map('intval', explode(',', $equipmentJson)));
+        if (!empty($equipmentIds)) {
+            $equipStmt = $pdo->prepare('INSERT INTO story_equipment
+                (story_id, equipment_id, role) VALUES (?, ?, ?)');
+            foreach ($equipmentIds as $equipId) {
+                if ($equipId > 0) {
+                    $equipStmt->execute([$story_id, $equipId, null]);
+                }
+            }
         }
     }
 

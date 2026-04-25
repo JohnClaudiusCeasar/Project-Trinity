@@ -163,7 +163,7 @@ const CREATE_TYPE_META = {
     story:     { icon: '◎', label: 'Story'             },
     character: { icon: '◈', label: 'Character'         },
     world:     { icon: '⬡', label: 'World'             },
-    object:    { icon: '✦', label: 'Object / Artifact'  },
+    equipment: { icon: '✦', label: 'Object / Artifact' },
 };
 
 // ------------------------------------------------------------
@@ -175,7 +175,7 @@ const CREATE_FORM_ROUTES = {
     story:     'content-pages/Forms/storyForm.php',
     character: 'content-pages/Forms/characterForm.php',
     world:     'content-pages/Forms/worldForm.php',
-    // object: 'content-pages/Dashboard/dashboardCreate-object.php',
+    equipment: 'content-pages/Forms/equipmentForm.php',
 };
 
 async function loadFormFragment(type, container) {

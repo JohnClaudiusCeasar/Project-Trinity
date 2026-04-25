@@ -12,7 +12,12 @@ USE trinity_db;
 
 DROP TABLE IF EXISTS story_character;
 DROP TABLE IF EXISTS story_world;
+DROP TABLE IF EXISTS story_equipment;
 DROP TABLE IF EXISTS character_world;
+DROP TABLE IF EXISTS equipment_story;
+DROP TABLE IF EXISTS equipment_character;
+DROP TABLE IF EXISTS equipment_world;
+DROP TABLE IF EXISTS character_equipment;
 
 -- ============================================================================
 -- STEP 2: Drop main data tables
@@ -21,6 +26,7 @@ DROP TABLE IF EXISTS character_world;
 DROP TABLE IF EXISTS stories;
 DROP TABLE IF EXISTS characters;
 DROP TABLE IF EXISTS worlds;
+DROP TABLE IF EXISTS equipment;
 
 -- ============================================================================
 -- STEP 3: Truncate and reset lookup tables (preserve seeds)
@@ -56,7 +62,28 @@ CREATE TABLE IF NOT EXISTS worlds (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 5: Recreate characters table
+-- STEP 5: Recreate equipment table
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS equipment (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    type_id TINYINT UNSIGNED NULL,
+    age VARCHAR(50) NULL,
+    description TEXT NULL,
+    status ENUM('active','inactive','unused','destroyed') DEFAULT 'unused',
+    appearance TEXT NULL,
+    features VARCHAR(255) NULL,
+    abilities TEXT NULL,
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (type_id) REFERENCES equipment_types (id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ============================================================================
+-- STEP 6: Recreate characters table
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS characters (
@@ -77,7 +104,7 @@ CREATE TABLE IF NOT EXISTS characters (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 6: Recreate lookup tables
+-- STEP 7: Recreate lookup tables
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS world_types (
@@ -98,7 +125,7 @@ CREATE TABLE IF NOT EXISTS factions (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 7: Recreate stories table
+-- STEP 8: Recreate stories table
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS stories (
@@ -117,7 +144,7 @@ CREATE TABLE IF NOT EXISTS stories (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 8: Recreate junction tables
+-- STEP 9: Recreate junction tables
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS character_world (
@@ -130,6 +157,59 @@ CREATE TABLE IF NOT EXISTS character_world (
     UNIQUE KEY unique_char_world (character_id, world_id),
     FOREIGN KEY (character_id) REFERENCES characters (id) ON DELETE CASCADE,
     FOREIGN KEY (world_id) REFERENCES worlds (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS character_equipment (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    character_id INT UNSIGNED NOT NULL,
+    equipment_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_char_equipment (character_id, equipment_id),
+    FOREIGN KEY (character_id) REFERENCES characters (id) ON DELETE CASCADE,
+    FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS equipment_world (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    equipment_id INT UNSIGNED NOT NULL,
+    world_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_equip_world (equipment_id, world_id),
+    FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE,
+    FOREIGN KEY (world_id) REFERENCES worlds (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS equipment_character (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    equipment_id INT UNSIGNED NOT NULL,
+    character_id INT UNSIGNED NOT NULL,
+    ownership_type ENUM('current','previous') NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_equip_char (equipment_id, character_id, ownership_type),
+    FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE,
+    FOREIGN KEY (character_id) REFERENCES characters (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS equipment_story (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    equipment_id INT UNSIGNED NOT NULL,
+    story_id INT UNSIGNED NOT NULL,
+    role VARCHAR(100) NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_equip_story (equipment_id, story_id),
+    FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE,
+    FOREIGN KEY (story_id) REFERENCES stories (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS story_equipment (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    story_id INT UNSIGNED NOT NULL,
+    equipment_id INT UNSIGNED NOT NULL,
+    role VARCHAR(100) NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_story_equipment (story_id, equipment_id),
+    FOREIGN KEY (story_id) REFERENCES stories (id) ON DELETE CASCADE,
+    FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS story_character (
@@ -155,7 +235,7 @@ CREATE TABLE IF NOT EXISTS story_world (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 9: Insert lookup seed data (for dropdowns)
+-- STEP 10: Insert lookup seed data (for dropdowns)
 -- ============================================================================
 
 INSERT IGNORE INTO world_types (name) VALUES

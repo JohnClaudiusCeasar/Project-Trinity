@@ -6,8 +6,10 @@
 // ============================================================
 
 const PICKER_META = {
-    world:     { eyebrow: 'Linked Worlds',    title: 'Select Worlds'    },
-    equipment: { eyebrow: 'Linked Equipment', title: 'Select Equipment' },
+    world:       { eyebrow: 'Linked Worlds',    title: 'Select Worlds'    },
+    equipment:   { eyebrow: 'Linked Equipment', title: 'Select Equipment' },
+    character:  { eyebrow: 'Linked Characters', title: 'Select Characters' },
+    story:      { eyebrow: 'Linked Stories', title: 'Select Stories' },
 };
 
 const WORLD_ROLE_OPTIONS = [

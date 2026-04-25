@@ -52,7 +52,7 @@ try {
         }
     }
 
-    if ($category === 'all' || $category === 'object') {
+    if ($category === 'all' || $category === 'object' || $category === 'equipment') {
         $stmt = $pdo->prepare('SELECT id, name, created_at FROM equipment WHERE created_by = ? ORDER BY created_at DESC');
         $stmt->execute([$user_id]);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

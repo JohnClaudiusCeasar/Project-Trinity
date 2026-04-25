@@ -32,7 +32,7 @@
                 <div class="create-type-arrow">→</div>
             </button>
 
-            <button class="create-type-card" data-type="object">
+            <button class="create-type-card" data-type="equipment">
                 <div class="create-type-icon">✦</div>
                 <div class="create-type-label">Object / Artifact</div>
                 <div class="create-type-desc">Items, relics, anomalies, and objects of significance</div>

@@ -84,23 +84,19 @@
     <!-- World Relations — injected dynamically -->
     <div class="world-relations" id="storyWorldRelations"></div>
 
-    <!-- Artifacts Involved -->
+    <!-- Equipment Involved -->
     <div class="form-field">
-        <label class="form-label">Artifacts Involved</label>
-        <div class="picker-field" id="storyArtifactsField">
-            <div class="picker-chips" id="storyArtifactsChips"></div>
+        <label class="form-label">Equipment Involved</label>
+        <div class="picker-field" id="storyEquipmentField">
+            <div class="picker-chips" id="storyEquipmentChips"></div>
             <button type="button" class="picker-trigger" data-picker="equipment"
-                    data-target-chips="storyArtifactsChips"
-                    data-target-hidden="storyArtifactsHidden"
-                    data-target-relations="storyArtifactRelations">
+                    data-target-chips="storyEquipmentChips"
+                    data-target-hidden="storyEquipmentHidden">
                 <span class="picker-trigger-icon">✦</span>
-                <span class="picker-trigger-label">Select artifacts…</span>
+                <span class="picker-trigger-label">Select equipment…</span>
             </button>
         </div>
-        <input type="hidden" id="storyArtifactsHidden" name="storyArtifacts">
-        <p class="form-hint" style="opacity: 0.5; font-size: 0.75rem; margin-top: 0.25rem;">
-            * Equipment/Artifacts picker coming soon.
-        </p>
+        <input type="hidden" id="storyEquipmentHidden" name="storyEquipment">
     </div>
 </div>
 

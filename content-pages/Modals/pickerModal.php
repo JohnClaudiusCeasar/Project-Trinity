@@ -18,6 +18,8 @@ try {
 
 $worlds = [];
 $equipment = [];
+$characters = [];
+$stories = [];
 $worldTypes = [];
 $equipTypes = [];
 
@@ -48,6 +50,30 @@ if ($db_ok) {
             LEFT JOIN equipment_types et ON e.type_id = et.id
             ORDER BY e.name";
         $equipment = $pdo->query($sqlEquip)->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Fetch Characters with date
+        $sqlChars = "
+            SELECT 
+                c.id, 
+                c.name, 
+                c.nickname AS `desc`, 
+                c.gender AS `type`,
+                c.created_at AS `date`
+            FROM characters c
+            ORDER BY c.name";
+        $characters = $pdo->query($sqlChars)->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Fetch Stories with date
+        $sqlStories = "
+            SELECT 
+                s.id, 
+                s.title AS name, 
+                s.synopsis AS `desc`, 
+                s.status AS `type`,
+                s.created_at AS `date`
+            FROM stories s
+            ORDER BY s.title";
+        $stories = $pdo->query($sqlStories)->fetchAll(PDO::FETCH_ASSOC);
         
         // Fetch Filter Options
         $worldTypes = $pdo->query("SELECT name FROM world_types ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
@@ -129,6 +155,8 @@ if ($db_ok) {
     window.PICKER_DB_DATA = {
         world: <?php echo json_encode($worlds ?: []); ?>,
         equipment: <?php echo json_encode($equipment ?: []); ?>,
+        character: <?php echo json_encode($characters ?: []); ?>,
+        story: <?php echo json_encode($stories ?: []); ?>,
         filters: {
             world: <?php echo json_encode($worldTypes ?: []); ?>,
             equipment: <?php echo json_encode($equipTypes ?: []); ?>
