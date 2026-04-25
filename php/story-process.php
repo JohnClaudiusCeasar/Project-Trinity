@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $title       = trim($_POST['storyTitle'] ?? '');
+$type_id    = trim($_POST['storyType'] ?? '') ?: null;
 $genre       = trim($_POST['storyGenre'] ?? '');
 $synopsis    = trim($_POST['storySynopsis'] ?? '');
 $status      = trim($_POST['storyStatus'] ?? 'wip');
@@ -54,10 +55,11 @@ try {
     $username = $usernameSql->fetchColumn() ?: 'Unknown';
 
     $stmt = $pdo->prepare('INSERT INTO stories
-        (title, genre, synopsis, status, entry_content, author, word_count, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+        (title, type_id, genre, synopsis, status, entry_content, author, word_count, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $title,
+        $type_id,
         $genre ?: null,
         $synopsis ?: null,
         $status,

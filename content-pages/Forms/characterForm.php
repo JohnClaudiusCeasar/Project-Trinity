@@ -1,6 +1,17 @@
 <!-- Character Form Fields -->
 <!-- Fetched dynamically by dashboard-script.js when type = 'character' -->
 
+<?php
+// Fetch character types for dropdown
+try {
+    require_once '../../php/db_connect.php';
+    $typesStmt = $pdo->query("SELECT id, name FROM character_types ORDER BY name");
+    $characterTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $characterTypes = [];
+}
+?>
+
 <!-- ── Section: Basic Information ── -->
 <div class="form-section">
     <div class="form-section-header">
@@ -11,6 +22,18 @@
         <label class="form-label" for="charName">Name</label>
         <input class="form-input" type="text" id="charName" name="charName"
                placeholder="Full name or designation…">
+    </div>
+
+    <div class="form-field">
+        <label class="form-label" for="charType">Type</label>
+        <select class="form-input form-select" id="charType" name="charType">
+            <option value="">Select type…</option>
+            <?php foreach ($characterTypes as $type): ?>
+            <option value="<?php echo htmlspecialchars($type['id']); ?>">
+                <?php echo htmlspecialchars($type['name']); ?>
+            </option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
     <div class="form-field">

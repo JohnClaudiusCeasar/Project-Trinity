@@ -1,6 +1,17 @@
 <!-- Story Form Fields -->
 <!-- Fetched dynamically by dashboard-script.js when type = 'story' -->
 
+<?php
+// Fetch story types for dropdown
+try {
+    require_once '../../php/db_connect.php';
+    $typesStmt = $pdo->query("SELECT id, name FROM story_types ORDER BY name");
+    $storyTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $storyTypes = [];
+}
+?>
+
 <!-- ── Section: Basic Information ── -->
 <div class="form-section">
     <div class="form-section-header">
@@ -11,6 +22,18 @@
         <label class="form-label" for="storyTitle">Title</label>
         <input class="form-input" type="text" id="storyTitle" name="storyTitle"
                placeholder="Title of the story…">
+    </div>
+
+    <div class="form-field">
+        <label class="form-label" for="storyType">Type</label>
+        <select class="form-input form-select" id="storyType" name="storyType">
+            <option value="">Select type…</option>
+            <?php foreach ($storyTypes as $type): ?>
+            <option value="<?php echo htmlspecialchars($type['id']); ?>">
+                <?php echo htmlspecialchars($type['name']); ?>
+            </option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
     <div class="form-field">

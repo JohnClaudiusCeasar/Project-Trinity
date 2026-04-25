@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $name        = trim($_POST['charName'] ?? '');
+$type_id    = trim($_POST['charType'] ?? '') ?: null;
 $nickname    = trim($_POST['charNickname'] ?? '');
 $age         = trim($_POST['charAge'] ?? '');
 $gender      = trim($_POST['charGender'] ?? '');
@@ -45,11 +46,12 @@ if (!empty($errors)) {
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare('INSERT INTO characters 
-        (name, nickname, age, gender, faction, appearance, abilities, bio, tags, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+$stmt = $pdo->prepare('INSERT INTO characters 
+        (name, type_id, nickname, age, gender, faction, appearance, abilities, bio, tags, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $name,
+        $type_id,
         $nickname ?: null,
         $age ?: null,
         $gender ?: null,

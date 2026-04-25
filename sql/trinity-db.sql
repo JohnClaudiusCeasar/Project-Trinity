@@ -38,6 +38,12 @@ CREATE TABLE IF NOT EXISTS equipment_types (
     name VARCHAR(50) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
+-- Create character_types lookup table
+CREATE TABLE IF NOT EXISTS character_types (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
 -- ============================================================================
 -- SEED USER: Insert default user (John-Trinity)
 -- ============================================================================
@@ -97,6 +103,7 @@ CREATE TABLE IF NOT EXISTS equipment (
 CREATE TABLE IF NOT EXISTS characters (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
+    type_id TINYINT UNSIGNED NULL,
     nickname VARCHAR(100) NULL,
     age VARCHAR(50) NULL,
     gender VARCHAR(50) NULL,
@@ -108,6 +115,7 @@ CREATE TABLE IF NOT EXISTS characters (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    FOREIGN KEY (type_id) REFERENCES character_types (id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
@@ -201,18 +209,18 @@ CREATE TABLE IF NOT EXISTS story_equipment (
 -- SEED DATA: Insert default types
 -- ============================================================================
 
--- Insert default world types
+-- Insert default world types (Complete replacement)
 INSERT IGNORE INTO world_types (name) VALUES
-('Fantasy'),
-('Sci-Fi'),
-('Modern'),
-('Historical'),
-('Post-Apocalyptic'),
-('Cyberpunk'),
-('Steampunk'),
-('Horror'),
-('Mystery'),
-('Other');
+('Multiverse'),
+('Universe'),
+('Galaxy'),
+('Star System'),
+('Planet'),
+('Continent'),
+('Metropolis'),
+('City'),
+('Town'),
+('Village/Tribe');
 
 -- Insert default equipment types
 INSERT IGNORE INTO equipment_types (name) VALUES
@@ -224,6 +232,21 @@ INSERT IGNORE INTO equipment_types (name) VALUES
 ('Artifact'),
 ('Vehicle'),
 ('Other');
+
+-- Insert default character types
+INSERT IGNORE INTO character_types (name) VALUES
+('Protagonist'),
+('Deuteragonist'),
+('Antagonist'),
+('Tritagonist'),
+('Contagonist'),
+('Others');
+
+-- Insert default story types
+INSERT IGNORE INTO story_types (name) VALUES
+('Chapter/Episode'),
+('Origin Story'),
+('Filler');
 
 -- Insert Factions
 INSERT IGNORE INTO factions (name, description) VALUES
@@ -237,9 +260,16 @@ INSERT IGNORE INTO factions (name, description) VALUES
 -- STORIES TABLE
 -- ============================================================================
 
+-- Create story_types lookup table
+CREATE TABLE IF NOT EXISTS story_types (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS stories (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,
+    type_id TINYINT UNSIGNED NULL,
     genre VARCHAR(100) NULL,
     synopsis TEXT NULL,
     status ENUM('wip','finished','cancelled') DEFAULT 'wip',
@@ -249,6 +279,7 @@ CREATE TABLE IF NOT EXISTS stories (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    FOREIGN KEY (type_id) REFERENCES story_types (id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 

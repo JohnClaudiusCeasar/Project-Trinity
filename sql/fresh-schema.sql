@@ -36,6 +36,8 @@ TRUNCATE TABLE factions;
 DROP TABLE IF EXISTS factions;
 DROP TABLE IF EXISTS world_types;
 DROP TABLE IF EXISTS equipment_types;
+DROP TABLE IF EXISTS character_types;
+DROP TABLE IF EXISTS story_types;
 
 -- ============================================================================
 -- STEP 4: Recreate worlds table (with type_id)
@@ -89,6 +91,7 @@ CREATE TABLE IF NOT EXISTS equipment (
 CREATE TABLE IF NOT EXISTS characters (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
+    type_id TINYINT UNSIGNED NULL,
     nickname VARCHAR(100) NULL,
     age VARCHAR(50) NULL,
     gender VARCHAR(50) NULL,
@@ -100,6 +103,7 @@ CREATE TABLE IF NOT EXISTS characters (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    FOREIGN KEY (type_id) REFERENCES character_types (id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
@@ -113,6 +117,16 @@ CREATE TABLE IF NOT EXISTS world_types (
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS equipment_types (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS character_types (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS story_types (
     id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
@@ -131,6 +145,7 @@ CREATE TABLE IF NOT EXISTS factions (
 CREATE TABLE IF NOT EXISTS stories (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,
+    type_id TINYINT UNSIGNED NULL,
     genre VARCHAR(100) NULL,
     synopsis TEXT NULL,
     status ENUM('wip','finished','cancelled') DEFAULT 'wip',
@@ -140,6 +155,7 @@ CREATE TABLE IF NOT EXISTS stories (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    FOREIGN KEY (type_id) REFERENCES story_types (id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
@@ -238,17 +254,18 @@ CREATE TABLE IF NOT EXISTS story_world (
 -- STEP 10: Insert lookup seed data (for dropdowns)
 -- ============================================================================
 
+-- Insert default world types (Complete replacement)
 INSERT IGNORE INTO world_types (name) VALUES
-('Fantasy'),
-('Sci-Fi'),
-('Modern'),
-('Historical'),
-('Post-Apocalyptic'),
-('Cyberpunk'),
-('Steampunk'),
-('Horror'),
-('Mystery'),
-('Other');
+('Multiverse'),
+('Universe'),
+('Galaxy'),
+('Star System'),
+('Planet'),
+('Continent'),
+('Metropolis'),
+('City'),
+('Town'),
+('Village/Tribe');
 
 INSERT IGNORE INTO equipment_types (name) VALUES
 ('Weapon'),
@@ -259,6 +276,21 @@ INSERT IGNORE INTO equipment_types (name) VALUES
 ('Artifact'),
 ('Vehicle'),
 ('Other');
+
+-- Insert default character types
+INSERT IGNORE INTO character_types (name) VALUES
+('Protagonist'),
+('Deuteragonist'),
+('Antagonist'),
+('Tritagonist'),
+('Contagonist'),
+('Others');
+
+-- Insert default story types
+INSERT IGNORE INTO story_types (name) VALUES
+('Chapter/Episode'),
+('Origin Story'),
+('Filler');
 
 INSERT IGNORE INTO factions (name, description) VALUES
 ('The Veil Accord', 'A secretive organization that maintains balance between realms'),
