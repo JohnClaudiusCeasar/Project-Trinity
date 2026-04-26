@@ -182,7 +182,7 @@ function initPickerModal() {
     let activeSort = 'az';
 
     // ── Open ──
-    window.openPickerModal = function (type, chipsEl, hiddenEl, relationsEl) {
+    window.openPickerModal = async function (type, chipsEl, hiddenEl, relationsEl) {
         currentType = type;
         currentChipsEl = chipsEl;
         currentHiddenEl = hiddenEl;
@@ -193,14 +193,25 @@ function initPickerModal() {
         modal.classList.add('open');
         searchInput.focus();
 
-        // Read from inline PHP data (no fetch needed)
-        if (!window.PICKER_DB_DATA) {
-            console.error('[Picker] Database data not loaded');
+        try {
+            const res = await fetch(`api/get-picker-items.php?type=${type}`);
+            if (!res.ok) throw new Error('Failed to fetch items');
+            const data = await res.json();
+            
+            allItems = data.items || [];
+            availableFilters = data.filters || [];
+            
+            // Keep a local copy for syncWorldRelationCards if needed
+            if (!window.PICKER_DB_DATA) window.PICKER_DB_DATA = {};
+            window.PICKER_DB_DATA[type] = allItems;
+            window.PICKER_DB_DATA.filters = window.PICKER_DB_DATA.filters || {};
+            window.PICKER_DB_DATA.filters[type] = availableFilters;
+
+        } catch (err) {
+            console.error('[Picker] Error fetching data:', err);
+            listEl.innerHTML = '<li class="picker-list-empty">Error loading archives.</li>';
             allItems = [];
             availableFilters = [];
-        } else {
-            allItems = window.PICKER_DB_DATA[type] || [];
-            availableFilters = window.PICKER_DB_DATA.filters?.[type] || [];
         }
 
         // Map existing hidden values to selectedItems
