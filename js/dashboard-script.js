@@ -2,12 +2,12 @@
 // PROJECT TRINITY — dashboard-script.js
 // ============================================================
 
-// ------------------------------------------------------------
+// ============================================================
 // NAV ROUTER
 // Maps page keys to their content source.
 // - type: 'fetch'       → loads a .php fragment via fetch()
 // - type: 'placeholder' → renders a "Content in Development" card
-// ------------------------------------------------------------
+// ============================================================
 const NAV_ROUTES = {
     archives: { type: 'fetch', src: 'content-pages/Dashboard/dashboardArchive.php' },
     create:   { type: 'fetch', src: 'content-pages/Dashboard/dashboardCreate.php'  },
@@ -65,9 +65,9 @@ function setActiveNav(pageKey) {
     });
 }
 
-// ------------------------------------------------------------
+// ============================================================
 // SIDEBAR
-// ------------------------------------------------------------
+// ============================================================
 (function () {
     const sidebar     = document.getElementById('sidebar');
     const pageWrapper = document.getElementById('pageWrapper');
@@ -102,9 +102,9 @@ function setActiveNav(pageKey) {
     });
 })();
 
-// ------------------------------------------------------------
+// ============================================================
 // NAV CLICK HANDLER — sidebar + header via [data-page]
-// ------------------------------------------------------------
+// ============================================================
 document.querySelectorAll('[data-page]').forEach(link => {
     link.addEventListener('click', e => {
         e.preventDefault();
@@ -115,10 +115,37 @@ document.querySelectorAll('[data-page]').forEach(link => {
     });
 });
 
-// ------------------------------------------------------------
-// ARCHIVE FEATURES
-// Re-initialised after every fetch inject
-// ------------------------------------------------------------
+// ============================================================
+// VIEW TOGGLE — Global state for list/grid view
+// ============================================================
+let currentViewMode = 'list';
+
+function setViewMode(view) {
+    if (view !== 'list' && view !== 'grid') return;
+    currentViewMode = view;
+    applyViewMode(view);
+    localStorage.setItem('entryViewMode', view);
+}
+
+function applyViewMode(view) {
+    const entryList = document.querySelector('.entry-list');
+    if (!entryList) return;
+    
+    if (view === 'grid') {
+        entryList.classList.add('grid-view');
+    } else {
+        entryList.classList.remove('grid-view');
+    }
+    
+    // Update active button
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+    });
+}
+
+// ============================================================
+// ARCHIVE FEATURES — re-initialised after fetch
+// ============================================================
 function initDashboardFeatures() {
     initStatToggle();
     initCategoryFilter();
@@ -156,9 +183,9 @@ function initCategoryFilter() {
     });
 }
 
-// ------------------------------------------------------------
+// ============================================================
 // CREATE PAGE — card picker → type-specific form flow
-// ------------------------------------------------------------
+// ============================================================
 const CREATE_TYPE_META = {
     story:     { icon: '◎', label: 'Story'             },
     character: { icon: '◈', label: 'Character'         },
@@ -166,11 +193,7 @@ const CREATE_TYPE_META = {
     equipment: { icon: '✦', label: 'Object / Artifact' },
 };
 
-// ------------------------------------------------------------
-// FORM FRAGMENT ROUTES
-// Maps each entry type to its standalone PHP form fragment.
-// Add a new entry here when a new type form is created.
-// ------------------------------------------------------------
+// Form fragment routes
 const CREATE_FORM_ROUTES = {
     story:     'content-pages/Forms/storyForm.php',
     character: 'content-pages/Forms/characterForm.php',
@@ -200,10 +223,129 @@ async function loadFormFragment(type, container) {
     }
 }
 
+// ============================================================
+// INIT CREATE PAGE
+// ============================================================
+function initCreatePage() {
+    const picker      = document.getElementById('createPicker');
+    const formWrapper = document.getElementById('createFormWrapper');
+    const formFields  = document.getElementById('createFormFields');
+    const backBtn     = document.getElementById('createBackBtn');
+    const cancelBtn   = document.getElementById('createCancelBtn');
+    const formIcon    = document.getElementById('createFormIcon');
+    const formLabel   = document.getElementById('createFormTypeLabel');
+    if (!picker || !formWrapper) return;
 
-// ------------------------------------------------------------
+    picker.querySelectorAll('.create-type-card').forEach(card => {
+        card.addEventListener('click', async () => {
+            const type = card.dataset.type;
+            const meta = CREATE_TYPE_META[type] || { icon: '✦', label: type };
+
+            if (formIcon)  formIcon.textContent  = meta.icon;
+            if (formLabel) formLabel.textContent = meta.label;
+
+            const mainContainer = document.querySelector('.create-main');
+            if (mainContainer) mainContainer.classList.add('is-form-active');
+
+            picker.style.display = 'none';
+            formWrapper.classList.add('visible');
+
+            // Fetch and inject type-specific form fragment
+            if (formFields) {
+                await loadFormFragment(type, formFields);
+                initTagsInputs();
+                initPickerTriggers();
+                initFormSubmission(type);
+
+                // Image upload initialization for character, equipment, world
+                if (type === 'character') {
+                    initImageUpload('character', 'charImagePreview', 'charImageHidden', 'charImageRemove', 'charImageWrapper');
+                } else if (type === 'equipment') {
+                    initImageUpload('equipment', 'equipImagePreview', 'equipImageHidden', 'equipImageRemove', 'equipImageWrapper');
+                } else if (type === 'world') {
+                    initImageUpload('world', 'worldImagePreview', 'worldImageHidden', 'worldImageRemove', 'worldImageWrapper');
+                }
+
+                // Story-specific initializations
+                if (type === 'story') {
+                    initSegmentedControl();
+                    initRichTextEditor();
+                }
+            }
+        });
+    });
+
+    backBtn?.addEventListener('click', returnToPicker);
+    cancelBtn?.addEventListener('click', returnToPicker);
+}
+
+// ============================================================
+// INIT VIEW PAGE — includes view toggle logic
+// ============================================================
+function initViewPage() {
+    const entryList = document.getElementById('viewEntryList');
+    if (!entryList) return;
+
+    // Load saved view preference
+    const savedView = localStorage.getItem('entryViewMode');
+    if (savedView === 'grid' || savedView === 'list') {
+        currentViewMode = savedView;
+    }
+    // Auto-switch to grid on mobile
+    if (window.innerWidth <= 768) {
+        currentViewMode = 'grid';
+    }
+    applyViewMode(currentViewMode);
+
+    const filterBtns = document.querySelectorAll('#viewEntryList ~ .filter-container .filter-btn, .filter-container .filter-btn');
+    
+    async function loadEntries(category = 'all') {
+        entryList.innerHTML = '<div class="loading-state">Loading entries...</div>';
+        
+        try {
+            const url = category === 'all' ? 'api/get-entries-html.php' : `api/get-entries-html.php?category=${category}`;
+            const res = await fetch(url);
+            const html = await res.text();
+            
+            if (html.trim()) {
+                entryList.innerHTML = html;
+                initEntryActions();
+                // Apply saved view mode after loading entries
+                applyViewMode(currentViewMode);
+            } else {
+                entryList.innerHTML = '<p class="empty-state">No entries yet. Create your first entry!</p>';
+            }
+        } catch (err) {
+            console.error('Error loading entries:', err);
+            entryList.innerHTML = '<p class="empty-state">Failed to load entries. Please try again.</p>';
+        }
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const category = btn.dataset.category || 'all';
+            loadEntries(category);
+        });
+    });
+
+    // View toggle buttons
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const view = btn.dataset.view;
+            if (view && view !== currentViewMode) {
+                setViewMode(view);
+            }
+        });
+    });
+
+    loadEntries();
+}
+
+// ============================================================
 // TAGS INPUT BEHAVIOUR
-// ------------------------------------------------------------
+// ============================================================
 function initTagsInputs() {
     document.querySelectorAll('.tags-input').forEach(input => {
         const listEl   = document.getElementById(input.id + 'List');
@@ -254,9 +396,9 @@ function initTagsInputs() {
     });
 }
 
-// ------------------------------------------------------------
+// ============================================================
 // SEGMENTED CONTROL (Status Toggle)
-// ------------------------------------------------------------
+// ============================================================
 function initSegmentedControl() {
     document.querySelectorAll('.segmented-control').forEach(control => {
         const buttons = control.querySelectorAll('.segment-btn');
@@ -276,9 +418,9 @@ function initSegmentedControl() {
     });
 }
 
-// ------------------------------------------------------------
+// ============================================================
 // RICH TEXT EDITOR
-// ------------------------------------------------------------
+// ============================================================
 function initRichTextEditor() {
     document.querySelectorAll('.rich-text-editor').forEach(editor => {
         const content = editor.querySelector('.rte-content');
@@ -390,9 +532,9 @@ function checkQuoteExit(content, hiddenInput) {
     }
 }
 
-// ------------------------------------------------------------
+// ============================================================
 // FORM SUBMISSION HANDLER
-// ------------------------------------------------------------
+// ============================================================
 function initFormSubmission(type) {
     const form = document.getElementById('createForm');
     if (!form) return;
@@ -469,126 +611,9 @@ function returnToPicker() {
     if (formFields) formFields.innerHTML = '';
 }
 
-// ------------------------------------------------------------
-// INIT CREATE PAGE
-// ------------------------------------------------------------
-function initCreatePage() {
-    const picker      = document.getElementById('createPicker');
-    const formWrapper = document.getElementById('createFormWrapper');
-    const formFields  = document.getElementById('createFormFields');
-    const backBtn     = document.getElementById('createBackBtn');
-    const cancelBtn   = document.getElementById('createCancelBtn');
-    const formIcon    = document.getElementById('createFormIcon');
-    const formLabel   = document.getElementById('createFormTypeLabel');
-    if (!picker || !formWrapper) return;
-
-    picker.querySelectorAll('.create-type-card').forEach(card => {
-        card.addEventListener('click', async () => {
-            const type = card.dataset.type;
-            const meta = CREATE_TYPE_META[type] || { icon: '✦', label: type };
-
-            if (formIcon)  formIcon.textContent  = meta.icon;
-            if (formLabel) formLabel.textContent = meta.label;
-
-            const mainContainer = document.querySelector('.create-main');
-            if (mainContainer) mainContainer.classList.add('is-form-active');
-
-            picker.style.display = 'none';
-            formWrapper.classList.add('visible');
-
-            // Fetch and inject type-specific form fragment
-            if (formFields) {
-                await loadFormFragment(type, formFields);
-                initTagsInputs();
-                initPickerTriggers();
-                initFormSubmission(type);
-
-                // Image upload initialization for character, equipment, world
-                if (type === 'character') {
-                    initImageUpload('character', 'charImagePreview', 'charImageHidden', 'charImageRemove', 'charImageWrapper');
-                } else if (type === 'equipment') {
-                    initImageUpload('equipment', 'equipImagePreview', 'equipImageHidden', 'equipImageRemove', 'equipImageWrapper');
-                } else if (type === 'world') {
-                    initImageUpload('world', 'worldImagePreview', 'worldImageHidden', 'worldImageRemove', 'worldImageWrapper');
-                }
-
-                // Story-specific initializations
-                if (type === 'story') {
-                    initSegmentedControl();
-                    initRichTextEditor();
-                }
-            }
-        });
-    });
-
-    backBtn?.addEventListener('click', returnToPicker);
-    cancelBtn?.addEventListener('click', returnToPicker);
-}
-
-// ------------------------------------------------------------
-// INIT VIEW PAGE
-// ------------------------------------------------------------
-async function initViewPage() {
-    const entryList = document.getElementById('viewEntryList');
-    if (!entryList) return;
-
-    const filterBtns = document.querySelectorAll('#viewEntryList ~ .filter-container .filter-btn, .filter-container .filter-btn');
-    
-async function loadEntries(category = 'all') {
-        entryList.innerHTML = '<div class="loading-state">Loading entries...</div>';
-        
-        try {
-            const url = category === 'all' ? 'api/get-entries-html.php' : `api/get-entries-html.php?category=${category}`;
-            const res = await fetch(url);
-            const html = await res.text();
-            
-            if (html.trim()) {
-                entryList.innerHTML = html;
-                initEntryActions();
-            } else {
-                entryList.innerHTML = '<p class="empty-state">No entries yet. Create your first entry!</p>';
-            }
-        } catch (err) {
-            console.error('Error loading entries:', err);
-            entryList.innerHTML = '<p class="empty-state">Failed to load entries. Please try again.</p>';
-        }
-    }
-
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const category = btn.dataset.category || 'all';
-            loadEntries(category);
-        });
-    });
-
-    loadEntries();
-}
-
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    return `${Math.floor(diffDays / 365)} years ago`;
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// ------------------------------------------------------------
+// ============================================================
 // ENTRY ACTIONS HANDLERS
-// ------------------------------------------------------------
+// ============================================================
 function initEntryActions() {
     document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -653,19 +678,18 @@ function closeConfirmModal() {
     if (backdrop) backdrop.classList.remove('visible');
 }
 
-// ------------------------------------------------------------
+// ============================================================
 // INIT — fetch picker modal once, then load default page
-// ------------------------------------------------------------
+// ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
     // Load picker modal markup into its persistent container
-    // (lives outside #mainContent so it survives SPA navigation)
     const pickerContainer = document.getElementById('pickerModalContainer');
     if (pickerContainer) {
         try {
             const res = await fetch('content-pages/Modals/pickerModal.php');
             if (res.ok) {
                 pickerContainer.innerHTML = await res.text();
-                initPickerModal();   // defined in picker-modal.js
+                initPickerModal();
             }
         } catch (err) {
             console.error('Could not load picker modal:', err);

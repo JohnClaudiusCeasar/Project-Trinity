@@ -26,13 +26,14 @@ $entries = [];
 
 try {
     if ($category === 'all' || $category === 'character') {
-        $stmt = $pdo->prepare('SELECT id, name, created_at, tags FROM characters WHERE created_by = ? ORDER BY created_at DESC');
+        $stmt = $pdo->prepare('SELECT id, name, image, created_at, tags FROM characters WHERE created_by = ? ORDER BY created_at DESC');
         $stmt->execute([$user_id]);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $entries[] = [
                 'id' => (int)$row['id'],
                 'type' => 'character',
                 'name' => $row['name'],
+                'image' => $row['image'] ?? '',
                 'created_at' => $row['created_at'],
                 'tags' => $row['tags'] ?? ''
             ];
@@ -40,13 +41,14 @@ try {
     }
 
     if ($category === 'all' || $category === 'world') {
-        $stmt = $pdo->prepare('SELECT id, name, created_at, tags FROM worlds WHERE created_by = ? ORDER BY created_at DESC');
+        $stmt = $pdo->prepare('SELECT id, name, image, created_at, tags FROM worlds WHERE created_by = ? ORDER BY created_at DESC');
         $stmt->execute([$user_id]);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $entries[] = [
                 'id' => (int)$row['id'],
                 'type' => 'world',
                 'name' => $row['name'],
+                'image' => $row['image'] ?? '',
                 'created_at' => $row['created_at'],
                 'tags' => $row['tags'] ?? ''
             ];
@@ -54,13 +56,14 @@ try {
     }
 
     if ($category === 'all' || $category === 'object' || $category === 'equipment') {
-        $stmt = $pdo->prepare('SELECT id, name, created_at, type_id FROM equipment WHERE created_by = ? ORDER BY created_at DESC');
+        $stmt = $pdo->prepare('SELECT id, name, image, created_at, type_id FROM equipment WHERE created_by = ? ORDER BY created_at DESC');
         $stmt->execute([$user_id]);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $entries[] = [
                 'id' => (int)$row['id'],
                 'type' => 'object',
                 'name' => $row['name'],
+                'image' => $row['image'] ?? '',
                 'created_at' => $row['created_at'],
                 'tags' => $row['type_id'] ?? ''
             ];
