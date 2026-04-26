@@ -138,7 +138,7 @@ function applyViewMode(view) {
     }
     
     // Update active button
-    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+    document.querySelectorAll('.view-toggle-switch').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.view === view);
     });
 }
@@ -330,12 +330,12 @@ function initViewPage() {
         });
     });
 
-    // View toggle buttons
-    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+    // View toggle switch
+    document.querySelectorAll('.view-toggle-switch').forEach(btn => {
         btn.addEventListener('click', () => {
-            const view = btn.dataset.view;
-            if (view && view !== currentViewMode) {
-                setViewMode(view);
+            const newView = currentViewMode === 'list' ? 'grid' : 'list';
+            if (newView !== currentViewMode) {
+                setViewMode(newView);
             }
         });
     });

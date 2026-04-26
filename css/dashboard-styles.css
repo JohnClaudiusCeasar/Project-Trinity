@@ -1,5 +1,12 @@
+/* Entry List Container */
+.entry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 /* Entry Tile Layout - List View */
-.entry-item {
+.entry-list .entry-item {
     display: flex;
     flex-direction: row;
     padding: 1rem;
@@ -10,10 +17,10 @@
     position: relative;
     overflow: hidden;
     gap: 1.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
 }
 
-.entry-item::after {
+.entry-list .entry-item::after {
     content: '';
     position: absolute;
     top: 0;
@@ -25,7 +32,7 @@
     z-index: -1;
 }
 
-.entry-item:hover::after { 
+.entry-list .entry-item:hover::after { 
     right: 0; 
 }
 
@@ -82,127 +89,280 @@
     margin: 0;
 }
 
-.entry-tags {
+.entry-tags, .tags-container {
     display: flex;
     gap: 0.5rem;
     margin-top: 0.5rem;
     flex-wrap: wrap;
 }
 
-/* View Control Buttons */
-.view-toggle {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+/* Tag styling */
+.tag {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    background-color: var(--primary);
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--primary);
+    border-radius: 2px;
 }
 
-.view-toggle-btn {
-    width: 40px;
-    height: 40px;
-    border: var(--border);
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
+.more-indicator {
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-left: 0.5rem;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+/* Entry Actions */
+.entry-actions {
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+
+.entry-list .entry-item:hover .entry-actions {
+    opacity: 1;
+}
+
+.entry-action-btn {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    background: var(--accent);
+    color: var(--primary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.entry-action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.entry-action-btn:hover {
+    background: var(--primary);
+    color: var(--secondary);
+    border-color: var(--primary);
+}
+
+.entry-action-btn.delete-btn:hover {
+    background: #d9534f;
+    border-color: #d9534f;
+    color: #fff;
+}
+
+/* Filter Container */
+.filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-shrink: 0;
+}
+
+/* Filter Buttons */
+.filter-btn {
+    padding: 0.6rem 1rem;
+    border: var(--border);
+    background-color: var(--secondary);
+    color: var(--primary);
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
     transition: var(--transition);
 }
 
-.view-toggle-btn:hover {
-    background: var(--bg-tertiary);
+.filter-btn:hover {
+    background-color: var(--accent);
 }
 
-.view-toggle-btn.active {
+/* View Control - Light Switch */
+.view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-toggle-switch {
+    position: relative;
+    width: 56px;
+    height: 28px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.view-toggle-switch.active {
     background: var(--accent);
     border-color: var(--border-color);
 }
 
-.view-toggle-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke: var(--text-muted);
+.view-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: var(--secondary);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.view-toggle-btn.active svg {
+.view-toggle-switch.active .view-toggle-thumb {
+    transform: translateX(28px);
+}
+
+.view-icon {
+    stroke: var(--text-muted);
+    transition: stroke 0.3s ease;
+}
+
+.view-toggle-switch.active + .view-icon-grid {
     stroke: var(--text-secondary);
 }
 
-/* Entry Card Layout - Grid View */
-.entry-item.grid-view {
+.view-icon-list {
+    stroke: var(--text-secondary);
+}
+
+.view-toggle-switch.active ~ .view-icon-list {
+    stroke: var(--text-muted);
+}
+
+/* ============================================================ */
+/* GRID VIEW STYLES - Applied when .grid-view is on .entry-list */
+/* ============================================================ */
+.entry-list.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.entry-list.grid-view .entry-item {
     display: flex;
     flex-direction: column;
-    padding: 1.5rem;
+    padding: 0;
     border: var(--border);
     background-color: var(--accent);
     transition: var(--transition);
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    margin-bottom: 1.5rem;
-    max-width: 350px;
+    margin-bottom: 0;
+    max-width: none;
 }
 
-.entry-item.grid-view img {
+.entry-list.grid-view .entry-item::after {
+    display: none;
+}
+
+.entry-list.grid-view .entry-image {
+    width: 100%;
+}
+
+.entry-list.grid-view .entry-image img {
     width: 100%;
     height: 200px;
     object-fit: cover;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+    border-radius: 0;
+    box-shadow: none;
 }
 
-.entry-item.grid-view svg {
+.entry-list.grid-view .entry-image-placeholder {
     width: 100%;
     height: 200px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 2px dashed var(--border-color);
 }
 
-.entry-item.grid-view .entry-image-svg-placeholder {
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--bg-secondary);
-    border: 2px dashed var(--border-color);
-    border-radius: var(--border-radius);
+.entry-list.grid-view .entry-content {
+    padding: 1.25rem;
+    text-align: center;
 }
 
-.entry-item.grid-view .entry-content {
-    margin-top: 1rem;
-}
-
-.entry-item.grid-view .entry-title {
-    font-size: 1.2rem;
-    display: -webkit-box;
+.entry-list.grid-view .entry-title {
+    font-size: 1.1rem;
     -webkit-line-clamp: 1;
+    display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    margin-bottom: 0.5rem;
 }
 
-/* Responsive */
+.entry-list.grid-view .entry-meta {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+}
+
+.entry-list.grid-view .entry-tags,
+.entry-list.grid-view .tags-container {
+    justify-content: center;
+    margin-top: 0;
+}
+
+.entry-list.grid-view .entry-actions {
+    opacity: 1;
+    justify-content: center;
+    padding: 0.75rem 1.25rem 1.25rem;
+    background-color: var(--bg-secondary);
+}
+
+.entry-list.grid-view .entry-item:hover .entry-actions {
+    opacity: 1;
+}
+
+/* ============================================================ */
+/* Responsive - Mobile */
+/* ============================================================ */
 @media (max-width: 768px) {
-    .entry-item {
+    .entry-list .entry-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
     
-    .entry-image {
+    .entry-list .entry-item .entry-image {
         width: 100%;
     }
     
-    .entry-image img {
+    .entry-list .entry-item .entry-image img {
         width: 100%;
         max-height: 200px;
         object-fit: cover;
     }
     
-    .entry-item.grid-view {
-        max-width: none;
+    .entry-list .entry-item .entry-image-placeholder {
+        width: 100%;
+        height: 150px;
     }
     
-    .entry-actions {
+    .entry-list .entry-item .entry-actions {
         opacity: 1;
         width: 100%;
         justify-content: flex-end;
+    }
+    
+    /* Grid view on mobile - single column */
+    .entry-list.grid-view {
+        grid-template-columns: 1fr;
     }
 }
