@@ -51,33 +51,37 @@ if ($db_ok) {
             ORDER BY e.name";
         $equipment = $pdo->query($sqlEquip)->fetchAll(PDO::FETCH_ASSOC);
         
-        // Fetch Characters with date
+        // Fetch Characters with character type and date
         $sqlChars = "
             SELECT 
                 c.id, 
                 c.name, 
                 c.nickname AS `desc`, 
-                c.gender AS `type`,
+                ct.name AS `type`,
                 c.created_at AS `date`
             FROM characters c
+            LEFT JOIN character_types ct ON c.type_id = ct.id
             ORDER BY c.name";
         $characters = $pdo->query($sqlChars)->fetchAll(PDO::FETCH_ASSOC);
         
-        // Fetch Stories with date
+        // Fetch Stories with story type and date
         $sqlStories = "
             SELECT 
                 s.id, 
                 s.title AS name, 
                 s.synopsis AS `desc`, 
-                s.status AS `type`,
+                st.name AS `type`,
                 s.created_at AS `date`
             FROM stories s
+            LEFT JOIN story_types st ON s.type_id = st.id
             ORDER BY s.title";
         $stories = $pdo->query($sqlStories)->fetchAll(PDO::FETCH_ASSOC);
         
         // Fetch Filter Options
         $worldTypes = $pdo->query("SELECT name FROM world_types ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
         $equipTypes = $pdo->query("SELECT name FROM equipment_types ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+        $characterTypes = $pdo->query("SELECT name FROM character_types ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+        $storyTypes = $pdo->query("SELECT name FROM story_types ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
         
     } catch (Exception $e) {
         $db_error = "Query Error: " . $e->getMessage();
@@ -159,7 +163,9 @@ if ($db_ok) {
         story: <?php echo json_encode($stories ?: []); ?>,
         filters: {
             world: <?php echo json_encode($worldTypes ?: []); ?>,
-            equipment: <?php echo json_encode($equipTypes ?: []); ?>
+            equipment: <?php echo json_encode($equipTypes ?: []); ?>,
+            character: <?php echo json_encode($characterTypes ?: []); ?>,
+            story: <?php echo json_encode($storyTypes ?: []); ?>
         }
     };
 

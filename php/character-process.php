@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $name        = trim($_POST['charName'] ?? '');
-$type_id    = trim($_POST['charType'] ?? '') ?: null;
+$type_id     = trim($_POST['charType'] ?? '') ?: null;
 $nickname    = trim($_POST['charNickname'] ?? '');
 $age         = trim($_POST['charAge'] ?? '');
 $gender      = trim($_POST['charGender'] ?? '');
@@ -48,7 +48,7 @@ try {
 
 $stmt = $pdo->prepare('INSERT INTO characters 
         (name, type_id, nickname, age, gender, faction, appearance, abilities, bio, tags, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $name,
         $type_id,
@@ -111,6 +111,6 @@ $stmt = $pdo->prepare('INSERT INTO characters
 } catch (PDOException $e) {
     $pdo->rollBack();
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to create character']);
+    echo json_encode(['success' => false, 'message' => 'Failed to create character'. $e->getMessage()]);
 }
 ?>

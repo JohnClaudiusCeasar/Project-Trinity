@@ -45,14 +45,6 @@ CREATE TABLE IF NOT EXISTS character_types (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- SEED USER: Insert default user (John-Trinity)
--- ============================================================================
-
--- Insert a test user (John-Trinity)
-INSERT INTO users (username, email, password, creator_id) VALUES
-('John-Trinity', 'john@trinity.com', '$2y$10$dummyhashfordevelopment123', 'JT001');
-
--- ============================================================================
 -- TIER 2: FIRST-LEVEL DEPENDENT TABLES (depend on users + type tables)
 -- ============================================================================
 
