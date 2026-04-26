@@ -27,6 +27,7 @@ $faction     = trim($_POST['charFaction'] ?? '');
 $appearance  = trim($_POST['charAppearance'] ?? '');
 $abilities   = trim($_POST['charAbilities'] ?? '');
 $bio         = trim($_POST['charBio'] ?? '');
+$image       = trim($_POST['charImage'] ?? '');
 $tags        = trim($_POST['charTags'] ?? '');
 $worldsJson  = $_POST['charWorld'] ?? '';
 $equipmentJson = $_POST['charEquipment'] ?? '';
@@ -47,8 +48,8 @@ try {
     $pdo->beginTransaction();
 
 $stmt = $pdo->prepare('INSERT INTO characters 
-        (name, type_id, nickname, age, gender, faction, appearance, abilities, bio, tags, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        (name, type_id, nickname, age, gender, faction, appearance, abilities, bio, image, tags, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $name,
         $type_id,
@@ -59,6 +60,7 @@ $stmt = $pdo->prepare('INSERT INTO characters
         $appearance ?: null,
         $abilities ?: null,
         $bio ?: null,
+        $image ?: null,
         $tags ?: null,
         $_SESSION['user_id']
     ]);

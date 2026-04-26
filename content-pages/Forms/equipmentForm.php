@@ -73,6 +73,19 @@ try {
             <option value="destroyed">Lost to Time</option>
         </select>
     </div>
+
+    <!-- Profile Image Upload -->
+    <div class="form-field">
+        <label class="form-label">Image</label>
+        <div class="image-upload-wrapper" id="equipImageWrapper">
+            <div class="image-preview" id="equipImagePreview">
+                <span class="image-preview-placeholder">No image</span>
+            </div>
+            <button type="button" class="btn-upload" id="equipImageBtn">Upload Image</button>
+            <button type="button" class="btn-remove-image" id="equipImageRemove" style="display: none;">Remove</button>
+        </div>
+        <input type="hidden" id="equipImageHidden" name="equipImage">
+    </div>
 </div>
 
 <!-- ── Section: Background ── -->

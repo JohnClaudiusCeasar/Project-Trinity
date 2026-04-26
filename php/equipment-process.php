@@ -52,8 +52,8 @@ try {
     $pdo->beginTransaction();
 
     $stmt = $pdo->prepare('INSERT INTO equipment
-        (name, type_id, age, description, status, appearance, features, abilities, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        (name, type_id, age, description, status, appearance, features, abilities, image, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $name,
         $type_id,
@@ -63,6 +63,7 @@ try {
         $appearance ?: null,
         $features ?: null,
         $abilities ?: null,
+        $image ?: null,
         $_SESSION['user_id']
     ]);
 

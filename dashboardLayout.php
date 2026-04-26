@@ -34,6 +34,10 @@ $initial = strtoupper(substr($username, 0, 1));
     <link rel="stylesheet" href="css/modal-picker.css">
     <link rel="stylesheet" href="css/entry-card.css">
     <link rel="stylesheet" href="css/dashboard-profile.css">
+
+    <!-- Cropper.js for image cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link rel="stylesheet" href="css/image-crop.css">
 </head>
 <body>
     <!-- Sidebar Backdrop -->
@@ -112,8 +116,15 @@ $initial = strtoupper(substr($username, 0, 1));
     <div id="confirmModalContainer">
         <?php include 'content-pages/Modals/confirmModal.php'; ?>
     </div>
+    <div id="imageCropModalContainer">
+        <?php include 'content-pages/Modals/imageCropModal.php'; ?>
+    </div>
 
     <script src="js/dashboard-script.js"></script>
     <script src="js/picker-modal.js"></script>
+
+    <!-- Cropper.js for image cropping -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="js/image-crop.js"></script>
 </body>
 </html>

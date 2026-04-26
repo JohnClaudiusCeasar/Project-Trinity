@@ -503,6 +503,15 @@ function initCreatePage() {
                 initPickerTriggers();
                 initFormSubmission(type);
 
+                // Image upload initialization for character, equipment, world
+                if (type === 'character') {
+                    initImageUpload('character', 'charImagePreview', 'charImageHidden', 'charImageRemove', 'charImageWrapper');
+                } else if (type === 'equipment') {
+                    initImageUpload('equipment', 'equipImagePreview', 'equipImageHidden', 'equipImageRemove', 'equipImageWrapper');
+                } else if (type === 'world') {
+                    initImageUpload('world', 'worldImagePreview', 'worldImageHidden', 'worldImageRemove', 'worldImageWrapper');
+                }
+
                 // Story-specific initializations
                 if (type === 'story') {
                     initSegmentedControl();

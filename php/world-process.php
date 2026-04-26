@@ -28,6 +28,7 @@ $population = trim($_POST['worldPopulation'] ?? '');
 $language   = trim($_POST['worldLanguage'] ?? '');
 $religion   = trim($_POST['worldReligion'] ?? '');
 $currency  = trim($_POST['worldCurrency'] ?? '');
+$image      = trim($_POST['worldImage'] ?? '');
 $tags       = trim($_POST['worldTags'] ?? '');
 $currentRulersJson = $_POST['worldCurrentRulers'] ?? '';
 $previousRulersJson = $_POST['worldPreviousRulers'] ?? '';
@@ -48,8 +49,8 @@ try {
     $pdo->beginTransaction();
 
     $stmt = $pdo->prepare('INSERT INTO worlds
-        (name, type_id, description, created_by, location, era, government, population, language, religion, currency, tags)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        (name, type_id, description, created_by, location, era, government, population, language, religion, currency, image, tags)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $name,
         $type_id,
@@ -62,6 +63,7 @@ try {
         $language ?: null,
         $religion ?: null,
         $currency ?: null,
+        $image ?: null,
         $tags ?: null
     ]);
 

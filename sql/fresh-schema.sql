@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS worlds (
     language VARCHAR(100) NULL,
     religion VARCHAR(100) NULL,
     currency VARCHAR(100) NULL,
+    image VARCHAR(255) NULL,
     tags VARCHAR(255) NULL,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -77,6 +78,7 @@ CREATE TABLE IF NOT EXISTS equipment (
     appearance TEXT NULL,
     features VARCHAR(255) NULL,
     abilities TEXT NULL,
+    image VARCHAR(255) NULL,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -99,6 +101,7 @@ CREATE TABLE IF NOT EXISTS characters (
     appearance TEXT NULL,
     abilities TEXT NULL,
     bio TEXT NULL,
+    image VARCHAR(255) NULL,
     tags VARCHAR(255) NULL,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -251,7 +254,7 @@ CREATE TABLE IF NOT EXISTS story_world (
 ) ENGINE=InnoDB;
 
 -- ============================================================================
--- STEP 10: Insert lookup seed data (for dropdowns)
+-- STEP 11: Insert lookup seed data (for dropdowns)
 -- ============================================================================
 
 -- Insert default world types (Complete replacement)

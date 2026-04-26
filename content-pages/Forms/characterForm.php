@@ -93,6 +93,19 @@ try {
     <!-- World Relation Cards — injected dynamically by picker-modal.js -->
     <div class="world-relations" id="charWorldRelations"></div>
 
+    <!-- Profile Image Upload -->
+    <div class="form-field">
+        <label class="form-label">Profile Image</label>
+        <div class="image-upload-wrapper" id="charImageWrapper">
+            <div class="image-preview" id="charImagePreview">
+                <span class="image-preview-placeholder">No image</span>
+            </div>
+            <button type="button" class="btn-upload" id="charImageBtn">Upload Image</button>
+            <button type="button" class="btn-remove-image" id="charImageRemove" style="display: none;">Remove</button>
+        </div>
+        <input type="hidden" id="charImageHidden" name="charImage">
+    </div>
+
 </div>
 
 <!-- ── Section: Profile ── -->
