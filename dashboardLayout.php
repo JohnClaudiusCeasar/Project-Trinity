@@ -113,6 +113,9 @@ $initial = strtoupper(substr($username, 0, 1));
     </div><!-- /.page-wrapper -->
 
     <div id="pickerModalContainer"></div>
+    <div id="viewModalContainer">
+        <?php include 'content-pages/Modals/viewModal.php'; ?>
+    </div>
     <div id="confirmModalContainer">
         <?php include 'content-pages/Modals/confirmModal.php'; ?>
     </div>

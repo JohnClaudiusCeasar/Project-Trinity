@@ -137,10 +137,11 @@ function applyViewMode(view) {
         entryList.classList.remove('grid-view');
     }
     
-    // Update active button
-    document.querySelectorAll('.view-toggle-switch').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === view);
-    });
+    // Update toggle checkbox state
+    const toggle = document.getElementById('viewModeToggle');
+    if (toggle) {
+        toggle.checked = (view === 'grid');
+    }
 }
 
 // ============================================================
@@ -331,14 +332,15 @@ function initViewPage() {
     });
 
     // View toggle switch
-    document.querySelectorAll('.view-toggle-switch').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const newView = currentViewMode === 'list' ? 'grid' : 'list';
+    const viewToggle = document.getElementById('viewModeToggle');
+    if (viewToggle) {
+        viewToggle.addEventListener('change', () => {
+            const newView = viewToggle.checked ? 'grid' : 'list';
             if (newView !== currentViewMode) {
                 setViewMode(newView);
             }
         });
-    });
+    }
 
     loadEntries();
 }
@@ -618,7 +620,9 @@ function initEntryActions() {
     document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            alert('View feature coming soon');
+            const id = btn.dataset.id;
+            const type = btn.dataset.type;
+            openViewModal(id, type);
         });
     });
 
@@ -637,6 +641,54 @@ function initEntryActions() {
             showDeleteConfirm(id, type);
         });
     });
+}
+
+async function openViewModal(id, type) {
+    const modal = document.getElementById('viewModal');
+    const backdrop = document.getElementById('viewModalBackdrop');
+    const body = document.getElementById('viewModalBody');
+
+    if (!modal || !backdrop || !body) {
+        console.error('View modal elements not found');
+        return;
+    }
+
+    body.innerHTML = '<div class="loading-state">Loading...</div>';
+    modal.classList.add('visible');
+    backdrop.classList.add('visible');
+
+    try {
+        const res = await fetch(`api/get-entry-details.php?id=${id}&type=${type}`);
+        const data = await res.json();
+
+        if (data.success && data.entry) {
+            renderViewModalContent(data.entry, data.entry_type);
+        } else {
+            body.innerHTML = '<p class="empty-state">Entry not found or you do not have permission to view it.</p>';
+        }
+    } catch (err) {
+        console.error('Error loading entry:', err);
+        body.innerHTML = '<p class="empty-state">Failed to load entry details. Please try again.</p>';
+    }
+}
+
+function closeViewModal() {
+    const modal = document.getElementById('viewModal');
+    const backdrop = document.getElementById('viewModalBackdrop');
+    if (modal) modal.classList.remove('visible');
+    if (backdrop) backdrop.classList.remove('visible');
+}
+
+function initViewModal() {
+    const closeBtn = document.getElementById('viewModalClose');
+    const closeBtnFooter = document.getElementById('viewModalCloseBtn');
+    const backdrop = document.getElementById('viewModalBackdrop');
+
+    const closeHandler = () => closeViewModal();
+
+    closeBtn?.addEventListener('click', closeHandler);
+    closeBtnFooter?.addEventListener('click', closeHandler);
+    backdrop?.addEventListener('click', closeHandler);
 }
 
 function showDeleteConfirm(id, type) {
@@ -682,6 +734,9 @@ function closeConfirmModal() {
 // INIT — fetch picker modal once, then load default page
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize view modal
+    initViewModal();
+
     // Load picker modal markup into its persistent container
     const pickerContainer = document.getElementById('pickerModalContainer');
     if (pickerContainer) {
