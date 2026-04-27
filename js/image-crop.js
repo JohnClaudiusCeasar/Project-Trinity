@@ -142,6 +142,13 @@
         formData.append('entityType', currentEntityType);
         formData.append('image', imageData);
 
+        // Get current image path to delete old one if replacing
+        const hiddenInput = document.getElementById(currentHiddenId);
+        const currentImagePath = hiddenInput ? hiddenInput.value : '';
+        if (currentImagePath) {
+            formData.append('oldImagePath', currentImagePath);
+        }
+
         fetch('../api/image-upload.php', {
             method: 'POST',
             body: formData
@@ -176,8 +183,25 @@
         });
     }
 
-    function removeImage() {
+    async function removeImage() {
         const hiddenInput = document.getElementById(currentHiddenId);
+        const currentImagePath = hiddenInput ? hiddenInput.value : '';
+
+        // Delete image from server if exists
+        if (currentImagePath) {
+            try {
+                const formData = new FormData();
+                formData.append('imagePath', currentImagePath);
+
+                await fetch('../api/delete-image.php', {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (err) {
+                console.error('Error deleting image:', err);
+            }
+        }
+
         if (hiddenInput) {
             hiddenInput.value = '';
         }

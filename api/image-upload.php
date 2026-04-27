@@ -71,6 +71,18 @@ if ($imageBase64 === false) {
     exit();
 }
 
+// Optional: Delete old image if replacing
+$oldImagePath = $_POST['oldImagePath'] ?? '';
+if (!empty($oldImagePath)) {
+    $oldImagePath = trim($oldImagePath);
+    if (strpos($oldImagePath, 'uploads/') === 0) {
+        $oldFullPath = dirname(dirname(__FILE__)) . '/' . $oldImagePath;
+        if (file_exists($oldFullPath) && is_file($oldFullPath)) {
+            unlink($oldFullPath);
+        }
+    }
+}
+
 $uploadDir = dirname(dirname(__FILE__)) . '/uploads/' . $entityType . 's/';
 
 if (!is_dir($uploadDir)) {

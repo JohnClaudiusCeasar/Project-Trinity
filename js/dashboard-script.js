@@ -283,6 +283,8 @@ function initCreatePage() {
 // ============================================================
 // INIT VIEW PAGE — includes view toggle logic
 // ============================================================
+let loadEntriesCallback = null;
+
 function initViewPage() {
     const entryList = document.getElementById('viewEntryList');
     if (!entryList) return;
@@ -321,6 +323,9 @@ function initViewPage() {
             entryList.innerHTML = '<p class="empty-state">Failed to load entries. Please try again.</p>';
         }
     }
+
+    // Expose loadEntries globally for use outside initViewPage
+    loadEntriesCallback = loadEntries;
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -707,9 +712,31 @@ function showDeleteConfirm(id, type) {
     modal.classList.add('visible');
     backdrop.classList.add('visible');
 
-    const handleConfirm = () => {
-        console.log(`Delete ${type} with id ${id}`);
-        closeConfirmModal();
+    const handleConfirm = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('type', type);
+
+            const res = await fetch('api/delete-entry.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                closeConfirmModal();
+                // Reload entries to reflect deletion
+                if (loadEntriesCallback) {
+                    loadEntriesCallback();
+                }
+            } else {
+                alert('Failed to delete: ' + data.message);
+            }
+        } catch (err) {
+            console.error('Error deleting entry:', err);
+            alert('Failed to delete entry');
+        }
     };
 
     const closeHandler = () => {
