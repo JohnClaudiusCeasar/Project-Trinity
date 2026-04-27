@@ -10,6 +10,7 @@ const PICKER_META = {
     equipment:   { eyebrow: 'Linked Equipment', title: 'Select Equipment' },
     character:  { eyebrow: 'Linked Characters', title: 'Select Characters' },
     story:      { eyebrow: 'Linked Stories', title: 'Select Stories' },
+    faction:    { eyebrow: 'Linked Factions', title: 'Select Factions' },
 };
 
 const WORLD_ROLE_OPTIONS = [

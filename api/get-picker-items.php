@@ -15,7 +15,7 @@ try {
 }
 $type = $_GET['type'] ?? '';
 
-if (!in_array($type, ['world', 'equipment', 'character', 'story'])) {
+if (!in_array($type, ['world', 'equipment', 'character', 'story', 'faction'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid type parameter']);
     exit;
@@ -54,28 +54,49 @@ try {
             $nameColumn = 'title';
             $descColumn = 'synopsis';
             break;
+        case 'faction':
+            $mainTable = 'factions';
+            $typeTable = 'faction_types';
+            $descColumn = 'description';
+            break;
     }
 
     // Build the query with JOINs for type names
-    $sql = "
-        SELECT 
-            t1.id,
-            t1.{$nameColumn} AS name,
-            t1.{$descColumn} AS `desc`,
-            t2.name AS type,
-            t1.created_at AS date
-            {$extraColumns}
-        FROM {$mainTable} t1
-        LEFT JOIN {$typeTable} t2 ON t1.{$typeColumn} = t2.id";
+    if ($type === 'faction') {
+        // Factions use a junction table for types
+        $sql = "
+            SELECT 
+                t1.id,
+                t1.{$nameColumn} AS name,
+                t1.{$descColumn} AS `desc`,
+                GROUP_CONCAT(DISTINCT t2.name ORDER BY t2.name ASC SEPARATOR ', ') AS type,
+                t1.created_at AS date
+            FROM {$mainTable} t1
+            LEFT JOIN faction_type ft ON t1.id = ft.faction_id
+            LEFT JOIN {$typeTable} t2 ON ft.type_id = t2.id
+            GROUP BY t1.id, t1.{$nameColumn}, t1.{$descColumn}, t1.created_at
+            ORDER BY t1.created_at DESC";
+    } else {
+        $sql = "
+            SELECT 
+                t1.id,
+                t1.{$nameColumn} AS name,
+                t1.{$descColumn} AS `desc`,
+                t2.name AS type,
+                t1.created_at AS date
+                {$extraColumns}
+            FROM {$mainTable} t1
+            LEFT JOIN {$typeTable} t2 ON t1.{$typeColumn} = t2.id";
 
-    if ($type === 'world') {
-        $sql .= "
-        LEFT JOIN character_world cw ON t1.id = cw.world_id
-        LEFT JOIN character_equipment ce ON t1.id = ce.equipment_id
-        GROUP BY t1.id, t1.name, t1.description, t2.name, t1.created_at";
+        if ($type === 'world') {
+            $sql .= "
+            LEFT JOIN character_world cw ON t1.id = cw.world_id
+            LEFT JOIN character_equipment ce ON t1.id = ce.equipment_id
+            GROUP BY t1.id, t1.name, t1.description, t2.name, t1.created_at";
+        }
+
+        $sql .= " ORDER BY t1.created_at DESC";
     }
-
-    $sql .= " ORDER BY t1.created_at DESC";
 
     $stmt = $pdo->query($sql);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);

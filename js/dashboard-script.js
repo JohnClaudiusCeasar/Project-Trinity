@@ -150,6 +150,8 @@ function applyViewMode(view) {
 function initDashboardFeatures() {
     initStatToggle();
     initCategoryFilter();
+    initTypeGridScroll();
+    initTypeGridDragScroll();
 }
 
 function initStatToggle() {
@@ -185,6 +187,58 @@ function initCategoryFilter() {
 }
 
 // ============================================================
+// INIT TYPE GRID SCROLL (Horizontal scroll with mouse wheel)
+// ============================================================
+function initTypeGridScroll() {
+    const typeGrid = document.querySelector('.create-type-grid');
+    if (!typeGrid) return;
+
+    typeGrid.addEventListener('wheel', (e) => {
+        const isScrollable = typeGrid.scrollWidth > typeGrid.clientWidth;
+        if (isScrollable) {
+            e.preventDefault();
+            typeGrid.scrollLeft += e.deltaY;
+        }
+    }, { passive: false });
+}
+
+// ============================================================
+// INIT TYPE GRID DRAG SCROLL (Click and drag to scroll)
+// ============================================================
+function initTypeGridDragScroll() {
+    const typeGrid = document.querySelector('.create-type-grid');
+    if (!typeGrid) return;
+
+    let isDragging = false;
+    let startX;
+    let startScrollLeft;
+
+    typeGrid.style.cursor = 'grab';
+
+    typeGrid.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        typeGrid.style.cursor = 'grabbing';
+        startX = e.pageX - typeGrid.offsetLeft;
+        startScrollLeft = typeGrid.scrollLeft;
+    });
+
+    ['mouseleave', 'mouseup'].forEach(evt => {
+        typeGrid.addEventListener(evt, () => {
+            isDragging = false;
+            typeGrid.style.cursor = 'grab';
+        });
+    });
+
+    typeGrid.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - typeGrid.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        typeGrid.scrollLeft = startScrollLeft - walk;
+    });
+}
+
+// ============================================================
 // CREATE PAGE — card picker → type-specific form flow
 // ============================================================
 const CREATE_TYPE_META = {
@@ -200,6 +254,7 @@ const CREATE_FORM_ROUTES = {
     character: 'content-pages/Forms/characterForm.php',
     world:     'content-pages/Forms/worldForm.php',
     equipment: 'content-pages/Forms/equipmentForm.php',
+    faction:   'content-pages/Forms/factionForm.php',
 };
 
 async function loadFormFragment(type, container) {
@@ -272,12 +327,105 @@ function initCreatePage() {
                     initSegmentedControl();
                     initRichTextEditor();
                 }
+
+                // Faction-specific initialization
+                if (type === 'faction') {
+                    initFactionForm();
+                }
             }
         });
     });
 
     backBtn?.addEventListener('click', returnToPicker);
     cancelBtn?.addEventListener('click', returnToPicker);
+}
+
+// ============================================================
+// INIT FACTION FORM
+// ============================================================
+function initFactionForm() {
+    // Multi-select Type Dropdown Logic
+    const typeTrigger = document.getElementById('factionTypeTrigger');
+    const typeDropdown = document.getElementById('factionTypeDropdown');
+    const typeHidden = document.getElementById('factionTypeHidden');
+    const typeCheckboxes = typeDropdown?.querySelectorAll('.multiselect-checkbox');
+    const typeCount = typeTrigger?.querySelector('.multiselect-count');
+    const typePlaceholder = typeTrigger?.querySelector('.multiselect-placeholder');
+
+    if (typeTrigger && typeDropdown) {
+        typeTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isNowOpen = typeDropdown.hidden;
+            typeDropdown.hidden = !isNowOpen;
+            typeTrigger.setAttribute('aria-expanded', !isNowOpen);
+        });
+
+        // Prevent closing when clicking inside dropdown
+        typeDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Close on outside click
+        document.addEventListener('click', () => {
+            if (!typeDropdown.hidden) {
+                typeDropdown.hidden = true;
+                typeTrigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !typeDropdown.hidden) {
+                typeDropdown.hidden = true;
+                typeTrigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        typeCheckboxes?.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const checked = typeDropdown.querySelectorAll('.multiselect-checkbox:checked');
+                if (checked.length > 2) {
+                    this.checked = false;
+                    return;
+                }
+                const selected = Array.from(checked).map(c => c.value);
+                typeHidden.value = selected.join(',');
+                typeCount.textContent = `${selected.length}/2 selected`;
+                typePlaceholder.textContent = selected.length > 0 ? selected.join(', ') : 'Select types…';
+            });
+        });
+    }
+
+    // Collapsible Persons In Authority Section (with smooth animation)
+    const collapsibleToggles = document.querySelectorAll('.collapsible-toggle');
+    collapsibleToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            const newExpanded = !expanded;
+            this.setAttribute('aria-expanded', newExpanded);
+            const bodyId = this.getAttribute('aria-controls');
+            const body = document.getElementById(bodyId);
+            if (body) {
+                if (newExpanded) {
+                    body.classList.remove('collapsible-body--hidden');
+                    body.getBoundingClientRect(); // force reflow to register 0 state
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                } else {
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                    body.getBoundingClientRect(); // force reflow
+                    body.style.maxHeight = '0';
+                    body.addEventListener('transitionend', () => {
+                        if (this.getAttribute('aria-expanded') !== 'true') {
+                            body.classList.add('collapsible-body--hidden');
+                            body.style.maxHeight = '';
+                        }
+                    }, { once: true });
+                }
+                const arrow = this.querySelector('.collapsible-arrow');
+                if (arrow) arrow.textContent = newExpanded ? '↑' : '↓';
+            }
+        });
+    });
 }
 
 // ============================================================

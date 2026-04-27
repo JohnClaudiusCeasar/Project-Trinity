@@ -11,17 +11,26 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.5rem;
+    padding-bottom: 1rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     justify-content: center;
     max-width: 100%;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary, #000) transparent;
 }
 
 .create-type-grid::-webkit-scrollbar {
-    display: none;
+    height: 6px;
+}
+
+.create-type-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.create-type-grid::-webkit-scrollbar-thumb {
+    background: var(--primary, #000);
+    border-radius: 3px;
 }
 
 /* --- Type Card (Horizontal) --- */
@@ -396,4 +405,146 @@
         bottom: 1rem;
         right: 1.25rem;
     }
+}
+
+/* --- Multi-select Dropdown --- */
+.custom-multiselect {
+    position: relative;
+    width: 100%;
+}
+
+.multiselect-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--primary, #000);
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--primary, #000);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s;
+}
+
+.multiselect-trigger:hover,
+.multiselect-trigger:focus-visible {
+    border-bottom-color: #555;
+}
+
+.multiselect-trigger[aria-expanded="true"] {
+    border-bottom-color: #555;
+}
+
+.multiselect-placeholder {
+    opacity: 0.6;
+}
+
+.multiselect-count {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+    margin-left: auto;
+    padding-left: 1rem;
+}
+
+.multiselect-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--secondary, #fff);
+    border: 2px solid var(--primary, #000);
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    padding: 0.5rem 0;
+}
+
+.multiselect-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.multiselect-option:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.multiselect-checkbox {
+    cursor: pointer;
+}
+
+.multiselect-option:has(.multiselect-checkbox:checked) {
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* --- Collapsible Toggle (Persons in Authority) --- */
+.collapsible-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 0;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--primary, #000);
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Inria Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary, #000);
+    opacity: 0.4;
+    transition: opacity 0.15s, border-color 0.15s;
+}
+
+.collapsible-toggle:hover {
+    opacity: 0.6;
+    border-bottom-color: #555;
+}
+
+.collapsible-toggle[aria-expanded="true"] {
+    border-bottom: none;
+    opacity: 0.6;
+}
+
+.collapsible-arrow {
+    font-size: 0.9rem;
+    transition: transform 0.2s ease;
+}
+
+.collapsible-toggle[aria-expanded="true"] .collapsible-arrow {
+    transform: rotate(180deg);
+}
+
+/* --- Collapsible Body with smooth animation --- */
+.collapsible-body {
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(0, 0, 0, 0.1);
+    margin-left: 0.5rem;
+}
+
+.collapsible-body--hidden {
+    max-height: 0;
+    overflow: hidden;
+}
+
+.collapsible-body:not(.collapsible-body--hidden) {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }

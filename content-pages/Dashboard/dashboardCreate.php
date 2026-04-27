@@ -39,6 +39,13 @@
                 <div class="create-type-arrow">→</div>
             </button>
 
+            <button class="create-type-card" data-type="faction">
+                <div class="create-type-icon">⚔</div>
+                <div class="create-type-label">Faction</div>
+                <div class="create-type-desc">Organizations, guilds, and governing bodies within your worlds</div>
+                <div class="create-type-arrow">→</div>
+            </button>
+
         </div>
     </div>
 

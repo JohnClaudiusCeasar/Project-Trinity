@@ -18,6 +18,11 @@ DROP TABLE IF EXISTS equipment_story;
 DROP TABLE IF EXISTS equipment_character;
 DROP TABLE IF EXISTS equipment_world;
 DROP TABLE IF EXISTS character_equipment;
+DROP TABLE IF EXISTS faction_type;
+DROP TABLE IF EXISTS faction_world;
+DROP TABLE IF EXISTS faction_founder;
+DROP TABLE IF EXISTS faction_character;
+DROP TABLE IF EXISTS faction_equipment;
 
 -- ============================================================================
 -- STEP 2: Drop main data tables
@@ -134,11 +139,71 @@ CREATE TABLE IF NOT EXISTS story_types (
     name VARCHAR(50) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS factions (
+CREATE TABLE IF NOT EXISTS faction_types (
     id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS factions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    economic_status VARCHAR(100) NULL,
+    social_status VARCHAR(100) NULL,
+    history TEXT NULL,
+    created_by INT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Faction Types (Many-to-Many, max 2 per faction enforced in app)
+CREATE TABLE IF NOT EXISTS faction_type (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    faction_id INT UNSIGNED NOT NULL,
+    type_id TINYINT UNSIGNED NOT NULL,
+    UNIQUE KEY unique_faction_type (faction_id, type_id),
+    FOREIGN KEY (faction_id) REFERENCES factions (id) ON DELETE CASCADE,
+    FOREIGN KEY (type_id) REFERENCES faction_types (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Faction Locations (Many-to-Many)
+CREATE TABLE IF NOT EXISTS faction_world (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    faction_id INT UNSIGNED NOT NULL,
+    world_id INT UNSIGNED NOT NULL,
+    UNIQUE KEY unique_faction_world (faction_id, world_id),
+    FOREIGN KEY (faction_id) REFERENCES factions (id) ON DELETE CASCADE,
+    FOREIGN KEY (world_id) REFERENCES worlds (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Faction Founders (Many-to-Many)
+CREATE TABLE IF NOT EXISTS faction_founder (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    faction_id INT UNSIGNED NOT NULL,
+    character_id INT UNSIGNED NOT NULL,
+    UNIQUE KEY unique_faction_founder (faction_id, character_id),
+    FOREIGN KEY (faction_id) REFERENCES factions (id) ON DELETE CASCADE,
+    FOREIGN KEY (character_id) REFERENCES characters (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Faction Characters (Leaders + Members combined, with role enum)
+CREATE TABLE IF NOT EXISTS faction_character (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    faction_id INT UNSIGNED NOT NULL,
+    character_id INT UNSIGNED NOT NULL,
+    role ENUM('primary_leader', 'secondary_leader', 'member') DEFAULT 'member',
+    FOREIGN KEY (faction_id) REFERENCES factions (id) ON DELETE CASCADE,
+    FOREIGN KEY (character_id) REFERENCES characters (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Faction Equipment/Treasures
+CREATE TABLE IF NOT EXISTS faction_equipment (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    faction_id INT UNSIGNED NOT NULL,
+    equipment_id INT UNSIGNED NOT NULL,
+    treasure_type ENUM('sacred', 'secret', 'other') DEFAULT 'other',
+    FOREIGN KEY (faction_id) REFERENCES factions (id) ON DELETE CASCADE,
+    FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- ============================================================================
@@ -294,6 +359,23 @@ INSERT IGNORE INTO story_types (name) VALUES
 ('Chapter/Episode'),
 ('Origin Story'),
 ('Filler');
+
+-- Insert faction types
+INSERT IGNORE INTO faction_types (name) VALUES
+('Political'),
+('Adventurer'),
+('Academic'),
+('Freedom'),
+('Mercenary'),
+('Religious/Cult'),
+('Secret/Spy'),
+('Corporations'),
+('Mafia'),
+('Knight/Templar'),
+('Industrial'),
+('Black'),
+('Magical Council'),
+('Entertainment');
 
 INSERT IGNORE INTO factions (name, description) VALUES
 ('The Veil Accord', 'A secretive organization that maintains balance between realms'),
