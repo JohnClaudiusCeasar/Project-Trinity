@@ -26,7 +26,7 @@ try {
     $typeTable = '';
     $typeColumn = 'type_id';
     $nameColumn = 'name';
-    $descColumn = 'description';
+    $descColumn = '';
     $extraColumns = '';
 
     // Determine table and type table based on request
@@ -34,16 +34,19 @@ try {
         case 'world':
             $mainTable = 'worlds';
             $typeTable = 'world_types';
+            $descColumn = 'description';
             $extraColumns = ", COUNT(DISTINCT cw.character_id) AS characters, COUNT(DISTINCT ce.equipment_id) AS artifacts";
             break;
         case 'equipment':
             $mainTable = 'equipment';
             $typeTable = 'equipment_types';
+            $descColumn = 'description';
             break;
         case 'character':
             $mainTable = 'characters';
             $typeTable = 'character_types';
-            $descColumn = 'nickname';
+            // Use bio as description (more substantial than nickname)
+            $descColumn = 'bio';
             break;
         case 'story':
             $mainTable = 'stories';

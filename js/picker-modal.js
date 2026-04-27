@@ -18,13 +18,56 @@ const WORLD_ROLE_OPTIONS = [
     { value: 'exile',      label: 'Exile'        },
     { value: 'visitor',    label: 'Visitor'      },
     { value: 'ruler',      label: 'Ruler'        },
-    { value: 'guardian',   label: 'Guardian'     },
-    { value: 'outcast',    label: 'Outcast'      },
-    { value: 'refugee',    label: 'Refugee'      },
-    { value: 'conqueror',  label: 'Conqueror'    },
-    { value: 'unknown',    label: 'Unknown'      },
-    { value: 'other',      label: 'Other'        },
+    { value: 'guardian',   label: 'Guardian'      },
+    { value: 'outcast',    label: 'Outcast'       },
+    { value: 'refugee',    label: 'Refugee'       },
+    { value: 'conqueror',  label: 'Conqueror'     },
+    { value: 'unknown',    label: 'Unknown'       },
+    { value: 'other',      label: 'Other'         },
 ];
+
+// ------------------------------------------------------------
+// HELPER FUNCTIONS FOR PICKER CARDS
+// ------------------------------------------------------------
+function truncateWords(text, maxWords) {
+    if (!text) return '';
+    const words = text.split(/\s+/);
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(' ');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function renderPickerCard(item, type) {
+    const fullDesc = item.desc || '';
+    const truncatedDesc = truncateWords(fullDesc, 200);
+    const needsExpand = fullDesc.split(/\s+/).length > 200;
+    
+    const typeIcon = {
+        equipment: '⚔',
+        character: '♟',
+        story: '📜'
+    }[type] || '▸';
+
+    return `
+        <div class="picker-card" data-id="${item.id}">
+            <div class="picker-card-header">
+                <span class="picker-card-icon">${typeIcon}</span>
+                <span class="picker-card-name">${escapeHtml(item.name)}</span>
+                <button type="button" class="picker-card-remove" data-id="${item.id}" aria-label="Remove ${escapeHtml(item.name)}">×</button>
+            </div>
+            <div class="picker-card-body">
+                <p class="picker-card-desc">${escapeHtml(truncatedDesc)}${needsExpand ? '<span class="picker-card-expand">...see more</span>' : ''}</p>
+            </div>
+            ${fullDesc ? `<div class="picker-card-full-desc" hidden>${escapeHtml(fullDesc)}</div>` : ''}
+        </div>
+    `;
+}
 
 // ------------------------------------------------------------
 // WORLD RELATION CARDS
@@ -382,18 +425,39 @@ function initPickerModal() {
 
         currentHiddenEl.value = selectedItems.map(s => s.id).join(',');
 
-        currentChipsEl.innerHTML = selectedItems.map(s => `
-            <span class="picker-chip" data-id="${s.id}">
-                ${s.name}
-                <button type="button" class="picker-chip-remove"
-                        data-id="${s.id}" aria-label="Remove ${s.name}">×</button>
-            </span>
-        `).join('');
+        // Render as cards for all types except world (world has special relation cards)
+        if (currentType !== 'world') {
+            currentChipsEl.innerHTML = selectedItems.map(item => renderPickerCard(item, currentType)).join('');
+            
+            // Add expand/collapse handlers for "see more"
+            currentChipsEl.querySelectorAll('.picker-card-expand').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const card = e.target.closest('.picker-card');
+                    const descEl = card.querySelector('.picker-card-desc');
+                    const fullDescEl = card.querySelector('.picker-card-full-desc');
+                    const isExpanded = card.classList.contains('is-expanded');
+                    
+                    card.classList.toggle('is-expanded');
+                    descEl.textContent = isExpanded ? truncateWords(fullDescEl.textContent, 200) : fullDescEl.textContent;
+                    e.target.textContent = isExpanded ? '...see more' : ' see less';
+                });
+            });
+        } else {
+            // Keep simple chips for world (they get rendered as relation cards separately)
+            currentChipsEl.innerHTML = selectedItems.map(s => `
+                <span class="picker-chip" data-id="${s.id}">
+                    ${s.name}
+                    <button type="button" class="picker-chip-remove"
+                            data-id="${s.id}" aria-label="Remove ${s.name}">×</button>
+                </span>
+            `).join('');
+        }
 
-        currentChipsEl.querySelectorAll('.picker-chip-remove').forEach(btn => {
+        currentChipsEl.querySelectorAll('.picker-chip-remove, .picker-card-remove').forEach(btn => {
             btn.addEventListener('click', () => {
                 const removedId = btn.dataset.id;
-                btn.closest('.picker-chip')?.remove();
+                const chipOrCard = btn.closest('.picker-chip') || btn.closest('.picker-card');
+                chipOrCard?.remove();
                 const vals = currentHiddenEl.value.split(',').filter(v => v !== removedId);
                 currentHiddenEl.value = vals.join(',');
 
