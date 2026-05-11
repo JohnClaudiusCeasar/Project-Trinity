@@ -1,6 +1,6 @@
 <?php
 // character-process.php
-// Handle character creation form submission
+// Handle character creation and update form submission
 
 session_start();
 
@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+$entry_id    = isset($_POST['entry_id']) ? (int)$_POST['entry_id'] : 0;
 $name        = trim($_POST['charName'] ?? '');
 $type_id     = trim($_POST['charType'] ?? '') ?: null;
 $nickname    = trim($_POST['charNickname'] ?? '');
@@ -44,33 +45,70 @@ if (!empty($errors)) {
     exit();
 }
 
+$user_id = $_SESSION['user_id'];
+
 try {
     $pdo->beginTransaction();
 
-$stmt = $pdo->prepare('INSERT INTO characters 
-        (name, type_id, nickname, age, gender, faction, appearance, abilities, bio, image, tags, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $stmt->execute([
-        $name,
-        $type_id,
-        $nickname ?: null,
-        $age ?: null,
-        $gender ?: null,
-        $faction ?: null,
-        $appearance ?: null,
-        $abilities ?: null,
-        $bio ?: null,
-        $image ?: null,
-        $tags ?: null,
-        $_SESSION['user_id']
-    ]);
+    if ($entry_id > 0) {
+        $checkStmt = $pdo->prepare('SELECT id FROM characters WHERE id = ? AND created_by = ?');
+        $checkStmt->execute([$entry_id, $user_id]);
+        if (!$checkStmt->fetch()) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Character not found']);
+            exit();
+        }
 
-    $character_id = $pdo->lastInsertId();
+        $stmt = $pdo->prepare('UPDATE characters SET
+            name = ?, type_id = ?, nickname = ?, age = ?, gender = ?,
+            faction = ?, appearance = ?, abilities = ?, bio = ?, image = ?, tags = ?
+            WHERE id = ? AND created_by = ?');
+        $stmt->execute([
+            $name,
+            $type_id,
+            $nickname ?: null,
+            $age ?: null,
+            $gender ?: null,
+            $faction ?: null,
+            $appearance ?: null,
+            $abilities ?: null,
+            $bio ?: null,
+            $image ?: null,
+            $tags ?: null,
+            $entry_id,
+            $user_id
+        ]);
+
+        $character_id = $entry_id;
+
+        $pdo->exec('DELETE FROM character_world WHERE character_id = ' . $entry_id);
+        $pdo->exec('DELETE FROM character_equipment WHERE character_id = ' . $entry_id);
+    } else {
+        $stmt = $pdo->prepare('INSERT INTO characters
+            (name, type_id, nickname, age, gender, faction, appearance, abilities, bio, image, tags, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([
+            $name,
+            $type_id,
+            $nickname ?: null,
+            $age ?: null,
+            $gender ?: null,
+            $faction ?: null,
+            $appearance ?: null,
+            $abilities ?: null,
+            $bio ?: null,
+            $image ?: null,
+            $tags ?: null,
+            $user_id
+        ]);
+
+        $character_id = $pdo->lastInsertId();
+    }
 
     if (!empty($worldsJson)) {
         $worlds = json_decode($worldsJson, true);
         if (is_array($worlds)) {
-            $worldStmt = $pdo->prepare('INSERT INTO character_world 
+            $worldStmt = $pdo->prepare('INSERT INTO character_world
                 (character_id, world_id, role, connection) VALUES (?, ?, ?, ?)');
             foreach ($worlds as $world) {
                 $worldId = $world['id'] ?? null;
@@ -91,7 +129,7 @@ $stmt = $pdo->prepare('INSERT INTO characters
     if (!empty($equipmentJson)) {
         $equipmentIds = json_decode($equipmentJson, true);
         if (is_array($equipmentIds)) {
-            $equipStmt = $pdo->prepare('INSERT INTO character_equipment 
+            $equipStmt = $pdo->prepare('INSERT INTO character_equipment
                 (character_id, equipment_id) VALUES (?, ?)');
             foreach ($equipmentIds as $equipId) {
                 if ($equipId) {
@@ -106,13 +144,13 @@ $stmt = $pdo->prepare('INSERT INTO characters
     http_response_code(201);
     echo json_encode([
         'success' => true,
-        'message' => 'Character created successfully',
+        'message' => $entry_id > 0 ? 'Character updated successfully' : 'Character created successfully',
         'redirect' => 'view'
     ]);
 
 } catch (PDOException $e) {
     $pdo->rollBack();
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to create character'. $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Failed to process character: ' . $e->getMessage()]);
 }
 ?>

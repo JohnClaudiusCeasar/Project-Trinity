@@ -1,0 +1,72 @@
+PROJECT TRINITY - BI-WEEKLY PROGRESS REPORT
+
+-------------------------------------------------------------------------------
+REPORT PERIOD: March 15 - March 28, 2026
+-------------------------------------------------------------------------------
+Project Title: Project Trinity
+Objective for this Week: Establish core architecture and basic authentication.
+Accomplished Tasks:
+- Initial Dashboard creation and Auth front-end integration.
+- PHP Authentication integration (Login/Register).
+- Dashboard UI updates and Create page integration.
+- Character Creation page development.
+Issues Encountered:
+- Initial authentication flow required refinement.
+- UI inconsistencies in early dashboard drafts.
+Solutions Applied:
+- Applied multiple rounds of "Dashboard Adjustments" to fix layout issues.
+- Integrated PHP back-end to secure the login process.
+Next Week Goals: Optimize database schema and character creation forms.
+
+-------------------------------------------------------------------------------
+REPORT PERIOD: March 29 - April 11, 2026
+-------------------------------------------------------------------------------
+Project Title: Project Trinity
+Objective for this Week: Finalize database schema and optimize core forms.
+Accomplished Tasks:
+- Character Creation Form optimization.
+- Database schema design and creation.
+Issues Encountered:
+- Form complexity leading to potential data entry errors.
+Solutions Applied:
+- Refined form fields and structure for better UX.
+Next Week Goals: Implement database integration for read operations and expand form types.
+
+-------------------------------------------------------------------------------
+REPORT PERIOD: April 12 - April 25, 2026
+-------------------------------------------------------------------------------
+Project Title: Project Trinity
+Objective for this Week: Expand entity support (World/Story) and integrate dynamic data.
+Accomplished Tasks:
+- Read-side Database integration.
+- Creation of World and Story forms.
+- View Page creation and Character DB integration.
+- Entry Card extraction and refactoring for modularity.
+- Migration of static HTML pages to PHP.
+Issues Encountered:
+- Broken authentication logic during integration.
+- Form handling logic errors across multiple entities.
+Solutions Applied:
+- Fixed authentication vulnerabilities.
+- Conducted major refactoring of form handling scripts (Character, World, Story).
+Next Week Goals: Implement image management and advanced UI toggles.
+
+-------------------------------------------------------------------------------
+REPORT PERIOD: April 26 - May 10, 2026
+-------------------------------------------------------------------------------
+Project Title: Project Trinity
+Objective for this Week: Finalize feature set and polish user interface.
+Accomplished Tasks:
+- Implementation of Equipment and Faction forms.
+- Image Upload system with optimization and cleanup logic.
+- View Modal and Grid/List toggle implementation.
+- User Profile styling and tab modifications.
+- Image cleanup script for orphaned assets.
+Issues Encountered:
+- Fetching entry data intermittently failing.
+- Orphaned images consuming storage space.
+Solutions Applied:
+- Fixed data fetching logic bugs.
+- Developed an automated image cleanup implementation.
+- Optimized image upload logic.
+Next Week Goals: Final testing, documentation, and deployment readiness.

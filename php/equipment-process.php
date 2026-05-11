@@ -1,6 +1,6 @@
 <?php
 // equipment-process.php
-// Handle equipment creation form submission
+// Handle equipment creation and update form submission
 
 session_start();
 
@@ -18,14 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$name        = trim($_POST['equipName'] ?? '');
+$entry_id   = isset($_POST['entry_id']) ? (int)$_POST['entry_id'] : 0;
+$name       = trim($_POST['equipName'] ?? '');
 $type_id    = trim($_POST['equipType'] ?? '') ?: null;
 $age        = trim($_POST['equipAge'] ?? '');
 $description = trim($_POST['equipDescription'] ?? '');
 $status     = trim($_POST['equipStatus'] ?? 'unused');
 $appearance = trim($_POST['equipAppearance'] ?? '');
 $features   = trim($_POST['equipFeatures'] ?? '');
-$abilities = trim($_POST['equipAbilities'] ?? '');
+$abilities  = trim($_POST['equipAbilities'] ?? '');
+$image      = trim($_POST['equipImage'] ?? '');
 
 $worldsJson = $_POST['equipWorld'] ?? '';
 $currentOwnerJson = $_POST['equipCurrentOwner'] ?? '';
@@ -48,36 +50,72 @@ if (!empty($errors)) {
     exit();
 }
 
+$user_id = $_SESSION['user_id'];
+
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare('INSERT INTO equipment
-        (name, type_id, age, description, status, appearance, features, abilities, image, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $stmt->execute([
-        $name,
-        $type_id,
-        $age ?: null,
-        $description ?: null,
-        $status,
-        $appearance ?: null,
-        $features ?: null,
-        $abilities ?: null,
-        $image ?: null,
-        $_SESSION['user_id']
-    ]);
+    if ($entry_id > 0) {
+        $checkStmt = $pdo->prepare('SELECT id FROM equipment WHERE id = ? AND created_by = ?');
+        $checkStmt->execute([$entry_id, $user_id]);
+        if (!$checkStmt->fetch()) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Equipment not found']);
+            exit();
+        }
 
-    $equipment_id = $pdo->lastInsertId();
+        $stmt = $pdo->prepare('UPDATE equipment SET
+            name = ?, type_id = ?, age = ?, description = ?, status = ?,
+            appearance = ?, features = ?, abilities = ?, image = ?
+            WHERE id = ? AND created_by = ?');
+        $stmt->execute([
+            $name,
+            $type_id,
+            $age ?: null,
+            $description ?: null,
+            $status,
+            $appearance ?: null,
+            $features ?: null,
+            $abilities ?: null,
+            $image ?: null,
+            $entry_id,
+            $user_id
+        ]);
+
+        $equipment_id = $entry_id;
+
+        $pdo->exec('DELETE FROM equipment_world WHERE equipment_id = ' . $entry_id);
+        $pdo->exec('DELETE FROM equipment_character WHERE equipment_id = ' . $entry_id);
+        $pdo->exec('DELETE FROM equipment_story WHERE equipment_id = ' . $entry_id);
+    } else {
+        $stmt = $pdo->prepare('INSERT INTO equipment
+            (name, type_id, age, description, status, appearance, features, abilities, image, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([
+            $name,
+            $type_id,
+            $age ?: null,
+            $description ?: null,
+            $status,
+            $appearance ?: null,
+            $features ?: null,
+            $abilities ?: null,
+            $image ?: null,
+            $user_id
+        ]);
+
+        $equipment_id = $pdo->lastInsertId();
+    }
 
     // Link to worlds (multiple)
     if (!empty($worldsJson)) {
-        $worldIds = array_filter(array_map('trim', explode(',', $worldsJson)));
-        if (!empty($worldIds)) {
+        $worldsData = json_decode($worldsJson, true);
+        if (is_array($worldsData)) {
             $worldStmt = $pdo->prepare('INSERT INTO equipment_world
                 (equipment_id, world_id) VALUES (?, ?)');
-            foreach ($worldIds as $worldId) {
-                $worldId = intval($worldId);
-                if ($worldId > 0) {
+            foreach ($worldsData as $world) {
+                $worldId = is_array($world) ? ($world['id'] ?? null) : intval($world);
+                if ($worldId) {
                     $worldStmt->execute([$equipment_id, $worldId]);
                 }
             }
@@ -86,7 +124,8 @@ try {
 
     // Link current owner (single)
     if (!empty($currentOwnerJson)) {
-        $currentOwnerId = intval(trim($currentOwnerJson));
+        $currentOwnerData = json_decode($currentOwnerJson, true);
+        $currentOwnerId = is_array($currentOwnerData) ? ($currentOwnerData['id'] ?? 0) : intval(trim($currentOwnerJson));
         if ($currentOwnerId > 0) {
             $currentStmt = $pdo->prepare('INSERT INTO equipment_character
                 (equipment_id, character_id, ownership_type) VALUES (?, ?, ?)');
@@ -96,13 +135,14 @@ try {
 
     // Link previous owners (multiple)
     if (!empty($previousOwnersJson)) {
-        $previousOwnerIds = array_filter(array_map('intval', explode(',', $previousOwnersJson)));
-        if (!empty($previousOwnerIds)) {
+        $previousOwnersData = json_decode($previousOwnersJson, true);
+        if (is_array($previousOwnersData)) {
             $prevStmt = $pdo->prepare('INSERT INTO equipment_character
                 (equipment_id, character_id, ownership_type) VALUES (?, ?, ?)');
-            foreach ($previousOwnerIds as $prevOwnerId) {
-                if ($prevOwnerId > 0) {
-                    $prevStmt->execute([$equipment_id, $prevOwnerId, 'previous']);
+            foreach ($previousOwnersData as $owner) {
+                $ownerId = is_array($owner) ? ($owner['id'] ?? 0) : intval($owner);
+                if ($ownerId > 0) {
+                    $prevStmt->execute([$equipment_id, $ownerId, 'previous']);
                 }
             }
         }
@@ -110,7 +150,8 @@ try {
 
     // Link origins story (single)
     if (!empty($originsJson)) {
-        $originsId = intval(trim($originsJson));
+        $originsData = json_decode($originsJson, true);
+        $originsId = is_array($originsData) ? ($originsData['id'] ?? 0) : intval(trim($originsJson));
         if ($originsId > 0) {
             $storyStmt = $pdo->prepare('INSERT INTO equipment_story
                 (equipment_id, story_id, role) VALUES (?, ?, ?)');
@@ -123,13 +164,13 @@ try {
     http_response_code(201);
     echo json_encode([
         'success' => true,
-        'message' => 'Equipment created successfully',
+        'message' => $entry_id > 0 ? 'Equipment updated successfully' : 'Equipment created successfully',
         'redirect' => 'view'
     ]);
 
 } catch (PDOException $e) {
     $pdo->rollBack();
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to create equipment: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Failed to process equipment: ' . $e->getMessage()]);
 }
 ?>

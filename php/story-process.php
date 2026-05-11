@@ -1,6 +1,6 @@
 <?php
 // story-process.php
-// Handle story creation form submission
+// Handle story creation and update form submission
 
 session_start();
 
@@ -18,8 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+$entry_id    = isset($_POST['entry_id']) ? (int)$_POST['entry_id'] : 0;
 $title       = trim($_POST['storyTitle'] ?? '');
-$type_id    = trim($_POST['storyType'] ?? '') ?: null;
+$type_id     = trim($_POST['storyType'] ?? '') ?: null;
 $genre       = trim($_POST['storyGenre'] ?? '');
 $synopsis    = trim($_POST['storySynopsis'] ?? '');
 $status      = trim($_POST['storyStatus'] ?? 'wip');
@@ -46,30 +47,65 @@ if (!empty($errors)) {
 }
 
 $wordCount = str_word_count(strip_tags($entry));
+$user_id = $_SESSION['user_id'];
 
 try {
     $pdo->beginTransaction();
 
-    $usernameSql = $pdo->prepare('SELECT username FROM users WHERE id = ?');
-    $usernameSql->execute([$_SESSION['user_id']]);
-    $username = $usernameSql->fetchColumn() ?: 'Unknown';
+    if ($entry_id > 0) {
+        $checkStmt = $pdo->prepare('SELECT id FROM stories WHERE id = ? AND created_by = ?');
+        $checkStmt->execute([$entry_id, $user_id]);
+        if (!$checkStmt->fetch()) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Story not found']);
+            exit();
+        }
 
-    $stmt = $pdo->prepare('INSERT INTO stories
-        (title, type_id, genre, synopsis, status, entry_content, author, word_count, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $stmt->execute([
-        $title,
-        $type_id,
-        $genre ?: null,
-        $synopsis ?: null,
-        $status,
-        $entry ?: null,
-        $username,
-        $wordCount,
-        $_SESSION['user_id']
-    ]);
+        $stmt = $pdo->prepare('UPDATE stories SET
+            title = ?, type_id = ?, genre = ?, synopsis = ?, status = ?,
+            entry_content = ?, tags = ?, word_count = ?
+            WHERE id = ? AND created_by = ?');
+        $stmt->execute([
+            $title,
+            $type_id,
+            $genre ?: null,
+            $synopsis ?: null,
+            $status,
+            $entry ?: null,
+            $tags ?: null,
+            $wordCount,
+            $entry_id,
+            $user_id
+        ]);
 
-    $story_id = $pdo->lastInsertId();
+        $story_id = $entry_id;
+
+        $pdo->exec('DELETE FROM story_character WHERE story_id = ' . $entry_id);
+        $pdo->exec('DELETE FROM story_world WHERE story_id = ' . $entry_id);
+        $pdo->exec('DELETE FROM story_equipment WHERE story_id = ' . $entry_id);
+    } else {
+        $usernameSql = $pdo->prepare('SELECT username FROM users WHERE id = ?');
+        $usernameSql->execute([$user_id]);
+        $username = $usernameSql->fetchColumn() ?: 'Unknown';
+
+        $stmt = $pdo->prepare('INSERT INTO stories
+            (title, type_id, genre, synopsis, status, entry_content, tags, author, word_count, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([
+            $title,
+            $type_id,
+            $genre ?: null,
+            $synopsis ?: null,
+            $status,
+            $entry ?: null,
+            $tags ?: null,
+            $username,
+            $wordCount,
+            $user_id
+        ]);
+
+        $story_id = $pdo->lastInsertId();
+    }
 
     if (!empty($charactersJson)) {
         $characters = json_decode($charactersJson, true);
@@ -111,11 +147,12 @@ try {
 
     // Link equipment (if any)
     if (!empty($equipmentJson)) {
-        $equipmentIds = array_filter(array_map('intval', explode(',', $equipmentJson)));
-        if (!empty($equipmentIds)) {
+        $equipmentData = json_decode($equipmentJson, true);
+        if (is_array($equipmentData)) {
             $equipStmt = $pdo->prepare('INSERT INTO story_equipment
                 (story_id, equipment_id, role) VALUES (?, ?, ?)');
-            foreach ($equipmentIds as $equipId) {
+            foreach ($equipmentData as $equip) {
+                $equipId = is_array($equip) ? ($equip['id'] ?? 0) : intval($equip);
                 if ($equipId > 0) {
                     $equipStmt->execute([$story_id, $equipId, null]);
                 }
@@ -128,13 +165,13 @@ try {
     http_response_code(201);
     echo json_encode([
         'success' => true,
-        'message' => 'Story created successfully',
+        'message' => $entry_id > 0 ? 'Story updated successfully' : 'Story created successfully',
         'redirect' => 'view'
     ]);
 
 } catch (PDOException $e) {
     $pdo->rollBack();
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to create story: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Failed to process story: ' . $e->getMessage()]);
 }
 ?>

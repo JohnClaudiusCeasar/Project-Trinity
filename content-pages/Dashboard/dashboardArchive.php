@@ -8,33 +8,50 @@
 <div class="stats-grid">
 
     <!-- Collapsible Total Entries Card -->
-    <div class="total-entries-card">
+    <div class="total-entries-card" id="totalEntriesCard">
         <div class="total-entries-header">
             <div class="total-entries-title">
                 <div class="total-entries-label">Total Entries</div>
-                <div class="total-entries-value">12</div>
+                <div class="total-entries-value" id="totalEntriesValue">0</div>
             </div>
             <div class="toggle-icon">▼</div>
         </div>
         <div class="category-breakdown">
             <div class="category-item">
                 <div class="category-item-label">Stories</div>
-                <div class="category-item-value">4</div>
+                <div class="category-item-value" id="countStory">0</div>
             </div>
             <div class="category-item">
                 <div class="category-item-label">Characters</div>
-                <div class="category-item-value">5</div>
+                <div class="category-item-value" id="countCharacter">0</div>
             </div>
             <div class="category-item">
                 <div class="category-item-label">Worlds</div>
-                <div class="category-item-value">2</div>
+                <div class="category-item-value" id="countWorld">0</div>
             </div>
             <div class="category-item">
                 <div class="category-item-label">Objects</div>
-                <div class="category-item-value">1</div>
+                <div class="category-item-value" id="countObject">0</div>
             </div>
         </div>
     </div>
+
+    <script>
+    (function() {
+        fetch('api/get-archive-stats.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.stats) {
+                    document.getElementById('totalEntriesValue').textContent = data.stats.total;
+                    document.getElementById('countStory').textContent = data.stats.story;
+                    document.getElementById('countCharacter').textContent = data.stats.character;
+                    document.getElementById('countWorld').textContent = data.stats.world;
+                    document.getElementById('countObject').textContent = data.stats.object;
+                }
+            })
+            .catch(err => console.error('Failed to load archive stats:', err));
+    })();
+    </script>
 
     <!-- Static Stat Cards -->
     <div class="stat-card">
@@ -72,52 +89,8 @@
             <button class="filter-btn" data-category="collaborative">Collaborative</button>
         </div>
 
-        <div class="entry-list">
-            <div class="entry-item" data-category="story">
-                <div class="entry-title">The Forgotten Protocol</div>
-                <div class="entry-meta">Created 2 days ago • 5.2k words</div>
-                <div class="entry-creators">By <strong>Horace</strong>, <strong>Arthyr</strong>, <strong>SephinxXie</strong></div>
-                <div class="entry-tags">
-                    <span class="tag">Fiction</span>
-                    <span class="tag">Collaborative</span>
-                </div>
-            </div>
-            <div class="entry-item" data-category="story">
-                <div class="entry-title">Recursive Dreams – Design Study</div>
-                <div class="entry-meta">Created 1 week ago • 3 images</div>
-                <div class="entry-creators">By <strong>Arthyr</strong></div>
-                <div class="entry-tags">
-                    <span class="tag">Fiction</span>
-                    <span class="tag">Design</span>
-                </div>
-            </div>
-            <div class="entry-item" data-category="story">
-                <div class="entry-title">Field Notes: Anomaly #7</div>
-                <div class="entry-meta">Created 2 weeks ago • 8.9k words</div>
-                <div class="entry-creators">By <strong>SephinxXie</strong>, <strong>Horace</strong></div>
-                <div class="entry-tags">
-                    <span class="tag">Research</span>
-                    <span class="tag">Profile</span>
-                </div>
-            </div>
-            <div class="entry-item" data-category="story">
-                <div class="entry-title">The Void Whisperer – Entity Classification</div>
-                <div class="entry-meta">Created 3 weeks ago • 4.1k words</div>
-                <div class="entry-creators">By <strong>Horace</strong></div>
-                <div class="entry-tags">
-                    <span class="tag">Entity</span>
-                    <span class="tag">Taxonomy</span>
-                </div>
-            </div>
-            <div class="entry-item" data-category="character">
-                <div class="entry-title">Artifact 049-β: The Pristine Compass</div>
-                <div class="entry-meta">Created 1 month ago • 2.8k words</div>
-                <div class="entry-creators">By <strong>Arthyr</strong></div>
-                <div class="entry-tags">
-                    <span class="tag">Object</span>
-                    <span class="tag">Artifact</span>
-                </div>
-            </div>
+        <div class="entry-list" id="archiveEntryList">
+            <div class="loading-state">Loading entries...</div>
         </div>
     </section>
 

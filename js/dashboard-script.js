@@ -50,6 +50,9 @@ async function loadPage(pageKey) {
             if (pageKey === 'view') {
                 initViewPage();
             }
+            if (pageKey === 'archives') {
+                initArchivePage();
+            }
         } catch (err) {
             console.error(err);
             main.innerHTML = buildPlaceholder(pageKey);
@@ -499,6 +502,47 @@ function initViewPage() {
 }
 
 // ============================================================
+// INIT ARCHIVE PAGE
+// ============================================================
+function initArchivePage() {
+    const entryList = document.getElementById('archiveEntryList');
+    if (!entryList) return;
+
+    const filterBtns = document.querySelectorAll('#archiveEntryList ~ .filter-container .filter-btn, .archive-section .filter-btn');
+
+    async function loadArchiveEntries(category = 'all') {
+        entryList.innerHTML = '<div class="loading-state">Loading entries...</div>';
+
+        try {
+            const url = category === 'all' ? 'api/get-entries-html.php' : `api/get-entries-html.php?category=${category}`;
+            const res = await fetch(url);
+            const html = await res.text();
+
+            if (html.trim()) {
+                entryList.innerHTML = html;
+                initEntryActions();
+            } else {
+                entryList.innerHTML = '<p class="empty-state">No entries yet. Create your first entry!</p>';
+            }
+        } catch (err) {
+            console.error('Error loading archive entries:', err);
+            entryList.innerHTML = '<p class="empty-state">Failed to load entries. Please try again.</p>';
+        }
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const category = btn.dataset.category || 'all';
+            loadArchiveEntries(category);
+        });
+    });
+
+    loadArchiveEntries();
+}
+
+// ============================================================
 // TAGS INPUT BEHAVIOUR
 // ============================================================
 function initTagsInputs() {
@@ -690,14 +734,15 @@ function checkQuoteExit(content, hiddenInput) {
 // ============================================================
 // FORM SUBMISSION HANDLER
 // ============================================================
-function initFormSubmission(type) {
-    const form = document.getElementById('createForm');
+function initFormSubmission(type, isEdit = false) {
+    const formId = isEdit ? 'createForm' : 'createForm';
+    const form = document.getElementById(formId);
     if (!form) return;
 
-    const submitBtn = document.getElementById('createSubmitBtn');
+    const submitBtn = document.getElementById(isEdit ? 'editSubmitBtn' : 'createSubmitBtn');
     if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Save Entry';
+        submitBtn.textContent = isEdit ? 'Save Changes' : 'Save Entry';
     }
 
     form.addEventListener('submit', async (e) => {
@@ -709,6 +754,10 @@ function initFormSubmission(type) {
         }
 
         const formData = new FormData(form);
+
+        if (isEdit && currentEditEntryId) {
+            formData.append('entry_id', currentEditEntryId);
+        }
 
         // Handle rich text editor hidden inputs before submission
         document.querySelectorAll('.rich-text-editor').forEach(editor => {
@@ -731,15 +780,16 @@ function initFormSubmission(type) {
             const data = await res.json();
 
             if (data.success) {
-                alert('Entry created successfully!');
-                returnToPicker();
-                setActiveNav('view');
-                loadPage('view');
+                alert(isEdit ? 'Entry updated successfully!' : 'Entry created successfully!');
+                closeEditModal();
+                if (loadEntriesCallback) {
+                    loadEntriesCallback();
+                }
             } else {
                 if (data.errors && Array.isArray(data.errors)) {
                     alert('Please fix the following:\n' + data.errors.join('\n'));
                 } else {
-                    alert(data.message || 'Failed to create entry');
+                    alert(data.message || (isEdit ? 'Failed to update entry' : 'Failed to create entry'));
                 }
             }
         } catch (err) {
@@ -748,7 +798,7 @@ function initFormSubmission(type) {
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Save Entry';
+                submitBtn.textContent = isEdit ? 'Save Changes' : 'Save Entry';
             }
         }
     });
@@ -782,7 +832,9 @@ function initEntryActions() {
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            alert('Edit feature coming soon');
+            const id = btn.dataset.id;
+            const type = btn.dataset.type;
+            openEditModal(id, type);
         });
     });
 
@@ -830,18 +882,59 @@ function closeViewModal() {
     const backdrop = document.getElementById('viewModalBackdrop');
     if (modal) modal.classList.remove('visible');
     if (backdrop) backdrop.classList.remove('visible');
+
+    const modeToggle = document.getElementById('viewModalModeToggle');
+    const saveBtn = document.getElementById('viewModalSaveBtn');
+    const formContainer = document.getElementById('editFormContainer');
+    const body = document.getElementById('viewModalBody');
+
+    if (modeToggle) modeToggle.style.display = 'none';
+    if (saveBtn) saveBtn.style.display = 'none';
+    if (formContainer) formContainer.style.display = 'none';
+    if (body) body.style.display = '';
+
+    currentEditEntryId = null;
+    currentEditEntryType = null;
 }
 
 function initViewModal() {
     const closeBtn = document.getElementById('viewModalClose');
     const closeBtnFooter = document.getElementById('viewModalCloseBtn');
+    const saveBtn = document.getElementById('viewModalSaveBtn');
     const backdrop = document.getElementById('viewModalBackdrop');
 
     const closeHandler = () => closeViewModal();
 
-    closeBtn?.addEventListener('click', closeHandler);
-    closeBtnFooter?.addEventListener('click', closeHandler);
-    backdrop?.addEventListener('click', closeHandler);
+    closeBtn?.addEventListener('click', () => {
+        if (currentEditEntryId) {
+            closeEditModal();
+        } else {
+            closeHandler();
+        }
+    });
+
+    closeBtnFooter?.addEventListener('click', () => {
+        if (currentEditEntryId) {
+            closeEditModal();
+        } else {
+            closeHandler();
+        }
+    });
+
+    backdrop?.addEventListener('click', () => {
+        if (currentEditEntryId) {
+            closeEditModal();
+        } else {
+            closeHandler();
+        }
+    });
+
+    saveBtn?.addEventListener('click', () => {
+        const editSubmitBtn = document.getElementById('editSubmitBtn');
+        if (editSubmitBtn) {
+            editSubmitBtn.click();
+        }
+    });
 }
 
 function showDeleteConfirm(id, type) {
@@ -903,6 +996,356 @@ function closeConfirmModal() {
     const backdrop = document.getElementById('confirmModalBackdrop');
     if (modal) modal.classList.remove('visible');
     if (backdrop) backdrop.classList.remove('visible');
+}
+
+// ============================================================
+// EDIT MODAL FUNCTIONALITY
+// ============================================================
+let currentEditEntryId = null;
+let currentEditEntryType = null;
+
+async function openEditModal(id, type) {
+    const modal = document.getElementById('viewModal');
+    const backdrop = document.getElementById('viewModalBackdrop');
+    const body = document.getElementById('viewModalBody');
+    const formContainer = document.getElementById('editFormContainer');
+    const formWrapper = document.getElementById('editFormWrapper');
+    const saveBtn = document.getElementById('viewModalSaveBtn');
+
+    if (!modal || !backdrop || !body) {
+        console.error('Edit modal elements not found');
+        return;
+    }
+
+    currentEditEntryId = parseInt(id);
+    currentEditEntryType = type;
+
+    body.innerHTML = '';
+    body.style.display = 'none';
+    formContainer.style.display = 'block';
+    formWrapper.innerHTML = '<div class="loading-state">Loading form...</div>';
+    saveBtn.style.display = 'inline-block';
+
+    modal.classList.add('visible');
+    backdrop.classList.add('visible');
+
+    try {
+        const [detailsRes, formRes] = await Promise.all([
+            fetch(`api/get-entry-details.php?id=${id}&type=${type}`),
+            loadFormFragmentForEdit(type)
+        ]);
+
+        const detailsData = await detailsRes.json();
+
+        if (!detailsData.success || !detailsData.entry) {
+            formWrapper.innerHTML = '<p class="empty-state">Entry not found.</p>';
+            return;
+        }
+
+        formWrapper.innerHTML = '<div id="createForm" class="edit-form"><div id="createFormFields"></div></div>';
+
+        const formFields = document.getElementById('createFormFields');
+        if (formRes) {
+            formFields.innerHTML = formRes;
+        }
+
+        const submitBtn = document.getElementById('createSubmitBtn');
+        if (submitBtn) {
+            submitBtn.id = 'editSubmitBtn';
+            submitBtn.textContent = 'Save Changes';
+        }
+
+        initTagsInputs();
+        initPickerTriggers();
+        initFormSubmission(type, true);
+
+        if (type === 'character') {
+            initImageUpload('character', 'charImagePreview', 'charImageHidden', 'charImageRemove', 'charImageWrapper');
+        } else if (type === 'equipment') {
+            initImageUpload('equipment', 'equipImagePreview', 'equipImageHidden', 'equipImageRemove', 'equipImageWrapper');
+        } else if (type === 'world') {
+            initImageUpload('world', 'worldImagePreview', 'worldImageHidden', 'worldImageRemove', 'worldImageWrapper');
+        }
+
+        if (type === 'story') {
+            initSegmentedControl();
+            initRichTextEditor();
+        }
+
+        setTimeout(() => {
+            populateFormFields(detailsData.entry, type);
+        }, 100);
+
+    } catch (err) {
+        console.error('Error loading edit modal:', err);
+        formWrapper.innerHTML = '<p class="empty-state">Failed to load form. Please try again.</p>';
+    }
+}
+
+async function loadFormFragmentForEdit(type) {
+    const src = CREATE_FORM_ROUTES[type];
+    if (!src) return null;
+
+    try {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error(`Failed to load form fragment: ${src}`);
+        return await res.text();
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+function populateFormFields(entry, type) {
+    if (type === 'character') {
+        setInputValue('charName', entry.name);
+        setSelectValue('charType', entry.type_id);
+        setInputValue('charNickname', entry.nickname);
+        setInputValue('charAge', entry.age);
+        setSelectValue('charGender', entry.gender);
+        setSelectValue('charFaction', entry.faction);
+        setInputValue('charAppearance', entry.appearance);
+        setInputValue('charAbilities', entry.abilities);
+        setInputValue('charBio', entry.bio);
+        setInputValue('charImage', entry.image);
+        setInputValue('charTags', entry.tags);
+        renderTagsFromString('charTags', entry.tags);
+
+        if (entry.image) {
+            const preview = document.getElementById('charImagePreview');
+            const removeBtn = document.getElementById('charImageRemove');
+            if (preview) preview.innerHTML = `<img src="${entry.image}" alt="Preview">`;
+            if (removeBtn) removeBtn.style.display = 'inline-block';
+        }
+
+        if (entry.worlds && Array.isArray(entry.worlds)) {
+            renderPickerChips('charWorldChips', entry.worlds, 'charWorldHidden', 'charWorld');
+        }
+
+        if (entry.equipment && Array.isArray(entry.equipment)) {
+            renderPickerChips('charEquipmentChips', entry.equipment, 'charEquipmentHidden', 'charEquipment');
+        }
+    }
+    else if (type === 'world') {
+        setInputValue('worldName', entry.name);
+        setSelectValue('worldType', entry.type_id);
+        setInputValue('worldDescription', entry.description);
+        setInputValue('worldLocation', entry.location);
+        setInputValue('worldEra', entry.era);
+        setSelectValue('worldGovernment', entry.government);
+        setInputValue('worldPopulation', entry.population);
+        setInputValue('worldLanguage', entry.language);
+        setInputValue('worldReligion', entry.religion);
+        setInputValue('worldCurrency', entry.currency);
+        setInputValue('worldImage', entry.image);
+        setInputValue('worldTags', entry.tags);
+        renderTagsFromString('worldTags', entry.tags);
+
+        if (entry.image) {
+            const preview = document.getElementById('worldImagePreview');
+            const removeBtn = document.getElementById('worldImageRemove');
+            if (preview) preview.innerHTML = `<img src="${entry.image}" alt="Preview">`;
+            if (removeBtn) removeBtn.style.display = 'inline-block';
+        }
+
+        const currentRulers = entry.characters ? entry.characters.filter(c => {
+            const role = c.role || '';
+            return role.toLowerCase().includes('current') || role.toLowerCase().includes('ruler');
+        }) : [];
+        if (currentRulers.length > 0) {
+            renderPickerChips('worldCurrentRulersChips', currentRulers, 'worldCurrentRulersHidden', 'worldCurrentRulers');
+        }
+
+        const previousRulers = entry.characters ? entry.characters.filter(c => {
+            const role = c.role || '';
+            return role.toLowerCase().includes('previous') || role.toLowerCase().includes('former');
+        }) : [];
+        if (previousRulers.length > 0) {
+            renderPickerChips('worldPreviousRulersChips', previousRulers, 'worldPreviousRulersHidden', 'worldPreviousRulers');
+        }
+    }
+    else if (type === 'equipment') {
+        setInputValue('equipName', entry.name);
+        setInputValue('equipAge', entry.age);
+        setInputValue('equipDescription', entry.description);
+        setSelectValue('equipType', entry.type_id);
+        setSelectValue('equipStatus', entry.status);
+        setInputValue('equipAppearance', entry.appearance);
+        setInputValue('equipFeatures', entry.features);
+        setInputValue('equipAbilities', entry.abilities);
+        setInputValue('equipImage', entry.image);
+        setInputValue('equipTags', entry.tags);
+        renderTagsFromString('equipTags', entry.tags);
+
+        if (entry.image) {
+            const preview = document.getElementById('equipImagePreview');
+            const removeBtn = document.getElementById('equipImageRemove');
+            if (preview) preview.innerHTML = `<img src="${entry.image}" alt="Preview">`;
+            if (removeBtn) removeBtn.style.display = 'inline-block';
+        }
+
+        if (entry.worlds && Array.isArray(entry.worlds)) {
+            renderPickerChips('equipWorldChips', entry.worlds, 'equipWorldHidden', 'equipWorld');
+        }
+
+        if (entry.current_owner) {
+            renderPickerChips('equipCurrentOwnerChips', [entry.current_owner], 'equipCurrentOwnerHidden', 'equipCurrentOwner');
+        }
+
+        if (entry.previous_owners && Array.isArray(entry.previous_owners)) {
+            renderPickerChips('equipPreviousOwnersChips', entry.previous_owners, 'equipPreviousOwnersHidden', 'equipPreviousOwners');
+        }
+    }
+    else if (type === 'story') {
+        setInputValue('storyTitle', entry.title);
+        setSelectValue('storyType', entry.type_id);
+        setInputValue('storySynopsis', entry.synopsis);
+        setInputValue('storyTags', entry.tags);
+        renderTagsFromString('storyTags', entry.tags);
+
+        if (entry.genre) {
+            renderTagsFromString('storyGenre', entry.genre);
+        }
+
+        const statusField = document.querySelector('.segmented-control');
+        if (statusField && entry.status) {
+            const buttons = statusField.querySelectorAll('.segment-btn');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === entry.status);
+            });
+            const hiddenInput = document.getElementById('storyStatus');
+            if (hiddenInput) hiddenInput.value = entry.status;
+        }
+
+        const rteContent = document.getElementById('storyEntry');
+        const rteHidden = document.getElementById('storyEntryHidden');
+        if (rteContent && entry.entry_content) {
+            rteContent.innerHTML = entry.entry_content;
+        }
+        if (rteHidden && entry.entry_content) {
+            rteHidden.value = entry.entry_content;
+        }
+
+        const wordCountEl = document.getElementById('storyWordCount');
+        if (wordCountEl && entry.word_count) {
+            wordCountEl.textContent = entry.word_count;
+        }
+
+        if (entry.characters && Array.isArray(entry.characters)) {
+            renderPickerChips('storyCharactersChips', entry.characters, 'storyCharactersHidden', 'storyCharacters');
+        }
+
+        if (entry.worlds && Array.isArray(entry.worlds)) {
+            renderPickerChips('storyWorldsChips', entry.worlds, 'storyWorldsHidden', 'storyWorlds');
+        }
+
+        if (entry.equipment && Array.isArray(entry.equipment)) {
+            renderPickerChips('storyEquipmentChips', entry.equipment, 'storyEquipmentHidden', 'storyEquipment');
+        }
+    }
+}
+
+function setInputValue(id, value) {
+    const el = document.getElementById(id);
+    if (el && value) el.value = value;
+}
+
+function setSelectValue(id, value) {
+    const el = document.getElementById(id);
+    if (el && value) el.value = value;
+}
+
+function renderTagsFromString(inputId, tagsString) {
+    if (!tagsString) return;
+
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(inputId + 'List');
+    const hidden = document.getElementById(inputId + 'Hidden');
+
+    if (!input || !list || !hidden) return;
+
+    const tags = tagsString.split(',').map(t => t.trim()).filter(t => t);
+    const listEl = list;
+    listEl.innerHTML = tags.map((tag, i) => `
+        <span class="tag-chip">
+            ${escapeHtml(tag)}
+            <button type="button" class="tag-remove" data-index="${i}" aria-label="Remove ${escapeHtml(tag)}">×</button>
+        </span>
+    `).join('');
+    hidden.value = tags.join(',');
+
+    listEl.querySelectorAll('.tag-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.index);
+            tags.splice(idx, 1);
+            listEl.innerHTML = tags.map((tag, i) => `
+                <span class="tag-chip">
+                    ${escapeHtml(tag)}
+                    <button type="button" class="tag-remove" data-index="${i}" aria-label="Remove ${escapeHtml(tag)}">×</button>
+                </span>
+            `).join('');
+            hidden.value = tags.join(',');
+        });
+    });
+}
+
+function renderPickerChips(chipsId, items, hiddenId, fieldName) {
+    const chipsEl = document.getElementById(chipsId);
+    const hiddenEl = document.getElementById(hiddenId);
+
+    if (!chipsEl || !hiddenEl || !items || !items.length) return;
+
+    const itemsData = items.map(item => ({
+        id: item.id,
+        name: item.name || item.title || 'Unnamed'
+    }));
+
+    chipsEl.innerHTML = itemsData.map(item => `
+        <span class="picker-chip">
+            ${escapeHtml(item.name)}
+            <button type="button" class="chip-remove" data-id="${item.id}" aria-label="Remove">×</button>
+        </span>
+    `).join('');
+
+    hiddenEl.value = JSON.stringify(itemsData);
+
+    chipsEl.querySelectorAll('.chip-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idToRemove = parseInt(btn.dataset.id);
+            const newItems = itemsData.filter(item => item.id !== idToRemove);
+            chipsEl.innerHTML = newItems.map(item => `
+                <span class="picker-chip">
+                    ${escapeHtml(item.name)}
+                    <button type="button" class="chip-remove" data-id="${item.id}" aria-label="Remove">×</button>
+                </span>
+            `).join('');
+            hiddenEl.value = JSON.stringify(newItems);
+        });
+    });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function closeEditModal() {
+    closeViewModal();
+
+    const modeToggle = document.getElementById('viewModalModeToggle');
+    const saveBtn = document.getElementById('viewModalSaveBtn');
+    const formContainer = document.getElementById('editFormContainer');
+    const body = document.getElementById('viewModalBody');
+
+    if (modeToggle) modeToggle.style.display = 'none';
+    if (saveBtn) saveBtn.style.display = 'none';
+    if (formContainer) formContainer.style.display = 'none';
+    if (body) body.style.display = '';
+
+    currentEditEntryId = null;
+    currentEditEntryType = null;
 }
 
 // ============================================================

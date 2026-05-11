@@ -1,8 +1,9 @@
-<!-- View Entry Modal -->
-<!-- Displays full entry information with clickable related entities -->
+<!-- View/Edit Entry Modal -->
+<!-- Displays full entry information with edit mode support -->
 <div class="modal-backdrop" id="viewModalBackdrop" aria-hidden="true"></div>
 <div class="modal view-modal" id="viewModal" role="dialog" aria-modal="true">
     <div class="modal-header">
+        <span class="modal-logo">✦</span>
         <h3 id="viewModalTitle">Entry Details</h3>
         <span class="entry-type-badge" id="viewModalType"></span>
         <button type="button" class="modal-close" id="viewModalClose" aria-label="Close">✕</button>
@@ -10,10 +11,36 @@
     <div class="modal-body view-modal-body" id="viewModalBody">
         <div class="loading-state">Loading...</div>
     </div>
+    <div class="edit-form-container" id="editFormContainer" style="display: none;">
+        <div class="edit-form-wrapper" id="editFormWrapper"></div>
+    </div>
     <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="viewModalSaveBtn" style="display: none;">Save Changes</button>
         <button type="button" class="btn btn-secondary" id="viewModalCloseBtn">Close</button>
     </div>
 </div>
+
+<style>
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.modal-logo {
+    font-size: 24px;
+    color: var(--primary-color, #4a90d9);
+    line-height: 1;
+}
+.edit-form-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+.edit-form-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+</style>
 
 <script>
 function renderViewModalContent(entry, type) {

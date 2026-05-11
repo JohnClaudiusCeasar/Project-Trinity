@@ -383,7 +383,3 @@ INSERT IGNORE INTO factions (name, description) VALUES
 ('The Hollow Collective', 'A network of information brokers and shadow operatives'),
 ('Freelance / Independent', 'Operates without formal allegiance'),
 ('Unaffiliated', 'No known faction ties');
-
--- ============================================================================
--- Refresh complete
--- ============================================================================
