@@ -11,6 +11,8 @@
         <button class="filter-btn" data-category="character">Characters</button>
         <button class="filter-btn" data-category="world">Worlds</button>
         <button class="filter-btn" data-category="object">Objects</button>
+        <button class="filter-btn" data-category="story">Stories</button>
+        <button class="filter-btn" data-category="faction">Factions</button>
     </div>
     <div class="view-toggle">
         <label class="toggle-container">

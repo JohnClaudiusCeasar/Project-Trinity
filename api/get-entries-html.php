@@ -118,6 +118,22 @@ try {
         }
     }
 
+    /** Logic for fetching faction entries */
+    if ($category === 'all' || $category === 'faction') {
+        $stmt = $pdo->prepare('SELECT id, name, created_at FROM factions WHERE created_by = ? ORDER BY created_at DESC');
+        $stmt->execute([$user_id]);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $entries[] = [
+                'id' => (int)$row['id'],
+                'type' => 'faction',
+                'name' => $row['name'],
+                'image' => '',
+                'created_at' => $row['created_at'],
+                'tags' => ''
+            ];
+        }
+    }
+
     /** Use-case: Present a unified timeline by sorting all entries by their creation date */
     usort($entries, function($a, $b) {
         // Compare timestamps in descending order

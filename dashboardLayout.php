@@ -134,5 +134,8 @@ $initial = strtoupper(substr($username, 0, 1));
     <!-- Cropper.js for image cropping -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="js/image-crop.js"></script>
+
+    <!-- html2pdf.js for PDF export in view modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>

@@ -1121,6 +1121,8 @@ async function openViewModal(id, type) {
 
         if (data.success && data.entry) {
             renderViewModalContent(data.entry, data.entry_type);
+            const exportBtn = document.getElementById('viewModalExportPdfBtn');
+            if (exportBtn) exportBtn.style.display = '';
         } else {
             body.innerHTML = '<p class="empty-state">Entry not found or you do not have permission to view it.</p>';
         }
@@ -1138,11 +1140,13 @@ function closeViewModal() {
 
     const modeToggle = document.getElementById('viewModalModeToggle');
     const saveBtn = document.getElementById('viewModalSaveBtn');
+    const exportBtn = document.getElementById('viewModalExportPdfBtn');
     const formContainer = document.getElementById('editFormContainer');
     const body = document.getElementById('viewModalBody');
 
     if (modeToggle) modeToggle.style.display = 'none';
     if (saveBtn) saveBtn.style.display = 'none';
+    if (exportBtn) exportBtn.style.display = 'none';
     if (formContainer) formContainer.style.display = 'none';
     if (body) body.style.display = '';
 
@@ -1153,6 +1157,7 @@ function closeViewModal() {
 function initViewModal() {
     const closeBtn = document.getElementById('viewModalClose');
     const closeBtnFooter = document.getElementById('viewModalCloseBtn');
+    const exportBtn = document.getElementById('viewModalExportPdfBtn');
     const saveBtn = document.getElementById('viewModalSaveBtn');
     const backdrop = document.getElementById('viewModalBackdrop');
 
@@ -1171,6 +1176,14 @@ function initViewModal() {
             closeEditModal();
         } else {
             closeHandler();
+        }
+    });
+
+    exportBtn?.addEventListener('click', () => {
+        if (typeof exportViewPdf === 'function') {
+            exportViewPdf();
+        } else {
+            alert('PDF export library not yet loaded. Please try again.');
         }
     });
 

@@ -15,6 +15,7 @@
         <div class="edit-form-wrapper" id="editFormWrapper"></div>
     </div>
     <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="viewModalExportPdfBtn" style="display: none;">Export PDF</button>
         <button type="button" class="btn btn-primary" id="viewModalSaveBtn" style="display: none;">Save Changes</button>
         <button type="button" class="btn btn-secondary" id="viewModalCloseBtn">Close</button>
     </div>
@@ -39,6 +40,39 @@
 .edit-form-wrapper {
     max-width: 800px;
     margin: 0 auto;
+}
+
+@media print {
+    .modal-backdrop, .modal-header, .modal-footer, .edit-form-container,
+    .modal-close, .relation-chip, .entry-action-btn, .view-toggle,
+    .filter-container, .dashboard-hero, .sidebar, .navbar {
+        display: none !important;
+    }
+    .view-modal {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        overflow: visible !important;
+    }
+    .view-modal-body {
+        overflow: visible !important;
+        padding: 0 !important;
+    }
+    .view-entry-layout {
+        grid-template-columns: 1fr !important;
+    }
+    .view-entry-image {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    .view-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    body { background: white !important; }
 }
 </style>
 
@@ -177,6 +211,80 @@ function renderViewModalContent(entry, type) {
     }
 
     // =====================
+    // FACTION TEMPLATE
+    // =====================
+    else if (type === 'faction') {
+        const typesList = entry.types && Array.isArray(entry.types) && entry.types.length
+            ? entry.types.map(t => t.name).join(', ')
+            : '';
+
+        detailsHtml = `
+            <div class="view-section">
+                <h4 class="view-section-title">Basic Information</h4>
+                <div class="view-field"><span class="view-label">Name:</span> ${escapeHtml(entry.name || '')}</div>
+                ${typesList ? `<div class="view-field"><span class="view-label">Types:</span> ${escapeHtml(typesList)}</div>` : ''}
+                ${entry.description ? `<div class="view-field"><span class="view-label">Description:</span> ${escapeHtml(entry.description)}</div>` : ''}
+            </div>
+            ${entry.economic_status ? `
+            <div class="view-section">
+                <h4 class="view-section-title">Economic Status</h4>
+                <p class="view-description">${escapeHtml(entry.economic_status)}</p>
+            </div>` : ''}
+            ${entry.social_status ? `
+            <div class="view-section">
+                <h4 class="view-section-title">Social Status</h4>
+                <p class="view-description">${escapeHtml(entry.social_status)}</p>
+            </div>` : ''}
+            ${entry.history ? `
+            <div class="view-section">
+                <h4 class="view-section-title">Historical Origins</h4>
+                <p class="view-description">${escapeHtml(entry.history)}</p>
+            </div>` : ''}
+            ${renderRelatedEntities('worlds', entry.worlds, 'Location')}
+            ${renderRelatedEntities('founders', entry.founders, 'Founder')}
+            ${entry.primary_leader ? `
+            <div class="view-section">
+                <h4 class="view-section-title">Primary Leader</h4>
+                <div class="view-relations">
+                    <button class="relation-chip" data-id="${entry.primary_leader.id}" data-type="character">
+                        ${escapeHtml(entry.primary_leader.name)}
+                    </button>
+                </div>
+            </div>` : ''}
+            ${entry.secondary_leader ? `
+            <div class="view-section">
+                <h4 class="view-section-title">Secondary Leader</h4>
+                <div class="view-relations">
+                    <button class="relation-chip" data-id="${entry.secondary_leader.id}" data-type="character">
+                        ${escapeHtml(entry.secondary_leader.name)}
+                    </button>
+                </div>
+            </div>` : ''}
+            ${renderRelatedEntities('members', entry.members, 'Member')}
+            ${entry.sacred_treasure ? `
+            <div class="view-section">
+                <h4 class="view-section-title">Sacred Treasure</h4>
+                <div class="view-relations">
+                    <button class="relation-chip" data-id="${entry.sacred_treasure.id}" data-type="equipment">
+                        ${escapeHtml(entry.sacred_treasure.name)}
+                    </button>
+                </div>
+            </div>` : ''}
+            ${entry.secret_treasure ? `
+            <div class="view-section">
+                <h4 class="view-section-title">Secret / Forbidden Treasure</h4>
+                <div class="view-relations">
+                    <button class="relation-chip" data-id="${entry.secret_treasure.id}" data-type="equipment">
+                        ${escapeHtml(entry.secret_treasure.name)}
+                    </button>
+                </div>
+            </div>` : ''}
+            ${renderRelatedEntities('other_treasures', entry.other_treasures, 'Equipment', 'Other Treasures')}
+            ${renderMetaDate(entry.created_at)}
+        `;
+    }
+
+    // =====================
     // STORY TEMPLATE
     // =====================
     else if (type === 'story') {
@@ -240,7 +348,7 @@ function renderRelatedEntities(key, items, singularLabel, customTitle = null) {
     
     const title = customTitle || singularLabel + (items.length > 1 ? 's' : '');
     const chips = items.map(item => `
-        <button class="relation-chip" data-id="${item.id}" data-type="${key === 'characters' ? 'character' : (key === 'worlds' ? 'world' : 'equipment')}">
+        <button class="relation-chip" data-id="${item.id}" data-type="${key === 'characters' || key === 'founders' || key === 'members' ? 'character' : (key === 'worlds' ? 'world' : 'equipment')}">
             ${escapeHtml(item.name)}
         </button>
     `).join('');
@@ -317,5 +425,24 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function exportViewPdf() {
+    const element = document.getElementById('viewModalBody');
+    const titleEl = document.getElementById('viewModalTitle');
+    if (!element || !titleEl) return;
+
+    const title = titleEl.textContent || 'entry';
+    const filename = title.replace(/[^a-zA-Z0-9]/g, '_') + '.pdf';
+
+    const opt = {
+        margin: [0.4, 0.4, 0.4, 0.4],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
 }
 </script>

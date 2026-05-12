@@ -806,6 +806,7 @@ main {
 .entry-type-badge.type-world { background: #e8f5e9; color: #2e7d32; }
 .entry-type-badge.type-equipment { background: #fff3e0; color: #ef6c00; }
 .entry-type-badge.type-story { background: #f3e5f5; color: #7b1fa2; }
+.entry-type-badge.type-faction { background: #fbe9e7; color: #bf360c; }
 
 .view-modal .modal-close {
     background: none;

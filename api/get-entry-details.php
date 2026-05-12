@@ -33,7 +33,7 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $type = isset($_GET['type']) ? $_GET['type'] : '';
 
 /** Use-case: Validate input parameters before proceeding */
-if (!$id || !in_array($type, ['character', 'world', 'equipment', 'story'])) {
+if (!$id || !in_array($type, ['character', 'world', 'equipment', 'story', 'faction'])) {
     // Set the HTTP response code to 400 (Bad Request)
     http_response_code(400);
     // Return an error message in JSON format
@@ -210,6 +210,70 @@ try {
                 $equipStmt->execute([$id]);
                 // Store associated equipment in the entry array
                 $entry['equipment'] = $equipStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+            break;
+
+        case 'faction':
+            $stmt = $pdo->prepare('SELECT * FROM factions WHERE id = ? AND created_by = ?');
+            $stmt->execute([$id, $user_id]);
+            $entry = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($entry) {
+                $typesStmt = $pdo->prepare('
+                    SELECT ft.id, ft.name FROM faction_types ft
+                    JOIN faction_type ftj ON ft.id = ftj.type_id
+                    WHERE ftj.faction_id = ?
+                ');
+                $typesStmt->execute([$id]);
+                $entry['types'] = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $worldStmt = $pdo->prepare('
+                    SELECT w.id, w.name FROM worlds w
+                    JOIN faction_world fw ON w.id = fw.world_id
+                    WHERE fw.faction_id = ?
+                ');
+                $worldStmt->execute([$id]);
+                $entry['worlds'] = $worldStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $founderStmt = $pdo->prepare('
+                    SELECT c.id, c.name FROM characters c
+                    JOIN faction_founder ff ON c.id = ff.character_id
+                    WHERE ff.faction_id = ?
+                ');
+                $founderStmt->execute([$id]);
+                $entry['founders'] = $founderStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $leaderStmt = $pdo->prepare('
+                    SELECT c.id, c.name, fc.role FROM characters c
+                    JOIN faction_character fc ON c.id = fc.character_id
+                    WHERE fc.faction_id = ?
+                ');
+                $leaderStmt->execute([$id]);
+                $leaders = $leaderStmt->fetchAll(PDO::FETCH_ASSOC);
+                $entry['primary_leader'] = null;
+                $entry['secondary_leader'] = null;
+                $entry['members'] = [];
+                foreach ($leaders as $l) {
+                    if ($l['role'] === 'primary_leader') $entry['primary_leader'] = $l;
+                    elseif ($l['role'] === 'secondary_leader') $entry['secondary_leader'] = $l;
+                    else $entry['members'][] = $l;
+                }
+
+                $treasureStmt = $pdo->prepare('
+                    SELECT e.id, e.name, fe.treasure_type FROM equipment e
+                    JOIN faction_equipment fe ON e.id = fe.equipment_id
+                    WHERE fe.faction_id = ?
+                ');
+                $treasureStmt->execute([$id]);
+                $treasures = $treasureStmt->fetchAll(PDO::FETCH_ASSOC);
+                $entry['sacred_treasure'] = null;
+                $entry['secret_treasure'] = null;
+                $entry['other_treasures'] = [];
+                foreach ($treasures as $t) {
+                    if ($t['treasure_type'] === 'sacred') $entry['sacred_treasure'] = $t;
+                    elseif ($t['treasure_type'] === 'secret') $entry['secret_treasure'] = $t;
+                    else $entry['other_treasures'][] = $t;
+                }
             }
             break;
     }
