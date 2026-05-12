@@ -530,6 +530,9 @@ function initArchivePage() {
         }
     }
 
+    // Expose loadArchiveEntries for list refreshing after edits
+    loadEntriesCallback = loadArchiveEntries;
+
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
@@ -735,14 +738,20 @@ function checkQuoteExit(content, hiddenInput) {
 // FORM SUBMISSION HANDLER
 // ============================================================
 function initFormSubmission(type, isEdit = false) {
-    const formId = isEdit ? 'createForm' : 'createForm';
+    const formId = isEdit ? 'editEntryForm' : 'createForm';
     const form = document.getElementById(formId);
     if (!form) return;
 
     const submitBtn = document.getElementById(isEdit ? 'editSubmitBtn' : 'createSubmitBtn');
+    const modalSaveBtn = isEdit ? document.getElementById('viewModalSaveBtn') : null;
+
     if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = isEdit ? 'Save Changes' : 'Save Entry';
+    }
+    if (modalSaveBtn) {
+        modalSaveBtn.disabled = false;
+        modalSaveBtn.textContent = 'Save Changes';
     }
 
     form.addEventListener('submit', async (e) => {
@@ -751,6 +760,10 @@ function initFormSubmission(type, isEdit = false) {
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Saving...';
+        }
+        if (modalSaveBtn) {
+            modalSaveBtn.disabled = true;
+            modalSaveBtn.textContent = 'Saving...';
         }
 
         const formData = new FormData(form);
@@ -799,6 +812,10 @@ function initFormSubmission(type, isEdit = false) {
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.textContent = isEdit ? 'Save Changes' : 'Save Entry';
+            }
+            if (modalSaveBtn) {
+                modalSaveBtn.disabled = false;
+                modalSaveBtn.textContent = 'Save Changes';
             }
         }
     });
@@ -1042,17 +1059,16 @@ async function openEditModal(id, type) {
             return;
         }
 
-        formWrapper.innerHTML = '<div id="createForm" class="edit-form"><div id="createFormFields"></div></div>';
+        formWrapper.innerHTML = `
+            <form id="editEntryForm" class="edit-form">
+                <div id="editFormFields"></div>
+                <button type="submit" id="editSubmitBtn" style="display: none;">Save Changes</button>
+            </form>
+        `;
 
-        const formFields = document.getElementById('createFormFields');
+        const formFields = document.getElementById('editFormFields');
         if (formRes) {
             formFields.innerHTML = formRes;
-        }
-
-        const submitBtn = document.getElementById('createSubmitBtn');
-        if (submitBtn) {
-            submitBtn.id = 'editSubmitBtn';
-            submitBtn.textContent = 'Save Changes';
         }
 
         initTagsInputs();
@@ -1107,7 +1123,7 @@ function populateFormFields(entry, type) {
         setInputValue('charAppearance', entry.appearance);
         setInputValue('charAbilities', entry.abilities);
         setInputValue('charBio', entry.bio);
-        setInputValue('charImage', entry.image);
+        setInputValue('charImageHidden', entry.image);
         setInputValue('charTags', entry.tags);
         renderTagsFromString('charTags', entry.tags);
 
@@ -1137,7 +1153,7 @@ function populateFormFields(entry, type) {
         setInputValue('worldLanguage', entry.language);
         setInputValue('worldReligion', entry.religion);
         setInputValue('worldCurrency', entry.currency);
-        setInputValue('worldImage', entry.image);
+        setInputValue('worldImageHidden', entry.image);
         setInputValue('worldTags', entry.tags);
         renderTagsFromString('worldTags', entry.tags);
 
@@ -1173,7 +1189,7 @@ function populateFormFields(entry, type) {
         setInputValue('equipAppearance', entry.appearance);
         setInputValue('equipFeatures', entry.features);
         setInputValue('equipAbilities', entry.abilities);
-        setInputValue('equipImage', entry.image);
+        setInputValue('equipImageHidden', entry.image);
         setInputValue('equipTags', entry.tags);
         renderTagsFromString('equipTags', entry.tags);
 
