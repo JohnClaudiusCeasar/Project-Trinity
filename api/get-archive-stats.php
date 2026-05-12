@@ -42,7 +42,8 @@ $stats = [
     'story' => 0,
     'character' => 0,
     'world' => 0,
-    'object' => 0
+    'object' => 0,
+    'faction' => 0
 ];
 
 /** Use-case: Fetch counts for each category and calculate the total aggregate */
@@ -79,8 +80,13 @@ try {
     // Fetch the count and store it in the stats array
     $stats['object'] = (int)$stmt->fetchColumn();
 
+    /** Logic for counting factions */
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM factions WHERE created_by = ?');
+    $stmt->execute([$user_id]);
+    $stats['faction'] = (int)$stmt->fetchColumn();
+
     // Calculate the total number of entries across all categories
-    $stats['total'] = $stats['story'] + $stats['character'] + $stats['world'] + $stats['object'];
+    $stats['total'] = $stats['story'] + $stats['character'] + $stats['world'] + $stats['object'] + $stats['faction'];
 
     // Return the calculated statistics as a JSON response
     echo json_encode([

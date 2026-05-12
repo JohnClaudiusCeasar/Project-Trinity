@@ -533,8 +533,28 @@ function initArchivePage() {
         }
     }
 
-    // Expose loadArchiveEntries for list refreshing after edits
-    loadEntriesCallback = loadArchiveEntries;
+    async function loadArchiveStats() {
+        try {
+            const res = await fetch('api/get-archive-stats.php');
+            const data = await res.json();
+            if (data.success && data.stats) {
+                document.getElementById('totalEntriesValue').textContent = data.stats.total;
+                document.getElementById('countStory').textContent = data.stats.story;
+                document.getElementById('countCharacter').textContent = data.stats.character;
+                document.getElementById('countWorld').textContent = data.stats.world;
+                document.getElementById('countObject').textContent = data.stats.object;
+                document.getElementById('countFaction').textContent = data.stats.faction;
+            }
+        } catch (err) {
+            console.error('Failed to load archive stats:', err);
+        }
+    }
+
+    // Expose loadArchiveEntries for list refreshing after edits — also refresh stats
+    loadEntriesCallback = () => {
+        loadArchiveEntries();
+        loadArchiveStats();
+    };
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -546,6 +566,7 @@ function initArchivePage() {
     });
 
     loadArchiveEntries();
+    loadArchiveStats();
 }
 
 // ============================================================

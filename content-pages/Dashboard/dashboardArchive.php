@@ -33,25 +33,12 @@
                 <div class="category-item-label">Objects</div>
                 <div class="category-item-value" id="countObject">0</div>
             </div>
+            <div class="category-item">
+                <div class="category-item-label">Factions</div>
+                <div class="category-item-value" id="countFaction">0</div>
+            </div>
         </div>
     </div>
-
-    <script>
-    (function() {
-        fetch('api/get-archive-stats.php')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.stats) {
-                    document.getElementById('totalEntriesValue').textContent = data.stats.total;
-                    document.getElementById('countStory').textContent = data.stats.story;
-                    document.getElementById('countCharacter').textContent = data.stats.character;
-                    document.getElementById('countWorld').textContent = data.stats.world;
-                    document.getElementById('countObject').textContent = data.stats.object;
-                }
-            })
-            .catch(err => console.error('Failed to load archive stats:', err));
-    })();
-    </script>
 
     <!-- Static Stat Cards -->
     <div class="stat-card">
