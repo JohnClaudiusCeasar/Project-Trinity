@@ -38,6 +38,30 @@ const RELATION_FIELDS = {
             { type: 'text',     key: 'role',       label: 'Role / Status', placeholder: 'e.g. Monarch, Advisor, General…' },
             { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe this character's role and connection…" },
         ]
+    },
+    equipWorld: {
+        fields: [
+            { type: 'text',     key: 'role',       label: 'Role / Status', placeholder: 'e.g. Origin World, Current Location, Traveled Through…' },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe the item's connection to this world…" },
+        ]
+    },
+    equipCurrentOwner: {
+        fields: [
+            { type: 'text',     key: 'bondLevel',  label: 'Bond Level',   placeholder: 'e.g. Close Companion, Loyal Servant, Fated Rival…' },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe the bond between the owner and this item…" },
+        ]
+    },
+    equipPreviousOwner: {
+        fields: [
+            { type: 'select',   key: 'type',       label: 'Type',         options: ['Inherited', 'Found', 'Stolen'] },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe the previous owner's history with this item…" },
+        ]
+    },
+    equipOrigin: {
+        fields: [
+            { type: 'text',     key: 'role',       label: 'Role in Origin', placeholder: 'e.g. Creation Myth, Forging, Discovery…' },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe how this story connects to the item's origin…" },
+        ]
     }
 };
 
@@ -419,6 +443,67 @@ function initPickerModal() {
         closeAllDropdowns();
     });
 
+    // ── Delegated handlers (registered once per chips container) ──
+    function handleChipRemove(e) {
+        const removeBtn = e.target.closest('.relation-card-remove, .picker-card-remove, .picker-chip-remove');
+        if (!removeBtn) return;
+        const removedId = removeBtn.dataset.id;
+        const card = removeBtn.closest('.relation-card, .picker-card, .picker-chip');
+        if (card) {
+            card.classList.add('relation-card--exit');
+            card.addEventListener('animationend', () => card.remove(), { once: true });
+        } else {
+            card?.remove();
+        }
+        const vals = currentHiddenEl.value.split(',').filter(v => v !== removedId);
+        currentHiddenEl.value = vals.join(',');
+        updatePickerTriggerLabel(currentChipsEl);
+    }
+
+    function handleRelationToggle(e) {
+        const toggleBtn = e.target.closest('.relation-card-toggle');
+        if (!toggleBtn) return;
+        const card = toggleBtn.closest('.relation-card');
+        if (!card) return;
+        const collapsible = card.querySelector('.relation-card-collapsible');
+        const isNowOpen = !card.classList.contains('is-expanded');
+
+        card.classList.toggle('is-expanded', isNowOpen);
+        toggleBtn.setAttribute('aria-expanded', isNowOpen);
+
+        if (isNowOpen) {
+            collapsible.removeAttribute('hidden');
+            collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
+        } else {
+            collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
+            collapsible.getBoundingClientRect();
+            collapsible.style.maxHeight = '0';
+            collapsible.addEventListener('transitionend', () => {
+                if (!card.classList.contains('is-expanded')) {
+                    collapsible.setAttribute('hidden', '');
+                    collapsible.style.maxHeight = '';
+                }
+            }, { once: true });
+        }
+    }
+
+    function ensurePickerChipsListeners(chipsEl) {
+        if (chipsEl.dataset.pickerListeners) return;
+        chipsEl.dataset.pickerListeners = 'true';
+        chipsEl.addEventListener('click', handleChipRemove);
+        chipsEl.addEventListener('click', handleRelationToggle);
+    }
+
+    function updatePickerTriggerLabel(chipsEl) {
+        const field = chipsEl.closest('.picker-field');
+        if (!field) return;
+        const label = field.querySelector('.picker-trigger-label');
+        if (!label) return;
+        label.dataset.defaultLabel = label.dataset.defaultLabel || label.textContent;
+        const count = chipsEl.querySelectorAll('.relation-card, .picker-card, .picker-chip').length;
+        label.textContent = count === 0 ? label.dataset.defaultLabel : `${count} selected`;
+    }
+
     // ── Confirm ─
     confirmBtn.addEventListener('click', () => {
         if (!currentChipsEl || !currentHiddenEl) return;
@@ -463,51 +548,11 @@ function initPickerModal() {
             });
         }
 
-        // Delegated remove handler on the chips container
-        currentChipsEl.addEventListener('click', function handleChipRemove(e) {
-            const removeBtn = e.target.closest('.relation-card-remove, .picker-card-remove, .picker-chip-remove');
-            if (!removeBtn) return;
-            const removedId = removeBtn.dataset.id;
-            const card = removeBtn.closest('.relation-card, .picker-card, .picker-chip');
-            if (card) {
-                card.classList.add('relation-card--exit');
-                card.addEventListener('animationend', () => card.remove(), { once: true });
-            } else {
-                card?.remove();
-            }
-            const vals = currentHiddenEl.value.split(',').filter(v => v !== removedId);
-            currentHiddenEl.value = vals.join(',');
-        });
+        // Bind delegated listeners once per chips container
+        ensurePickerChipsListeners(currentChipsEl);
 
-        // Delegated toggle handler for relation cards
-        if (configKey && RELATION_FIELDS[configKey]) {
-            currentChipsEl.addEventListener('click', function handleRelationToggle(e) {
-                const toggleBtn = e.target.closest('.relation-card-toggle');
-                if (!toggleBtn) return;
-                const card = toggleBtn.closest('.relation-card');
-                if (!card) return;
-                const collapsible = card.querySelector('.relation-card-collapsible');
-                const isNowOpen = !card.classList.contains('is-expanded');
-
-                card.classList.toggle('is-expanded', isNowOpen);
-                toggleBtn.setAttribute('aria-expanded', isNowOpen);
-
-                if (isNowOpen) {
-                    collapsible.removeAttribute('hidden');
-                    collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
-                } else {
-                    collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
-                    collapsible.getBoundingClientRect();
-                    collapsible.style.maxHeight = '0';
-                    collapsible.addEventListener('transitionend', () => {
-                        if (!card.classList.contains('is-expanded')) {
-                            collapsible.setAttribute('hidden', '');
-                            collapsible.style.maxHeight = '';
-                        }
-                    }, { once: true });
-                }
-            });
-        }
+        // Update trigger label to reflect selection
+        updatePickerTriggerLabel(currentChipsEl);
 
         closeModal();
     });

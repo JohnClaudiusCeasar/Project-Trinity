@@ -55,7 +55,8 @@ try {
             <div class="picker-chips" id="equipWorldChips"></div>
             <button type="button" class="picker-trigger" data-picker="world"
                     data-target-chips="equipWorldChips"
-                    data-target-hidden="equipWorldHidden">
+                    data-target-hidden="equipWorldHidden"
+                    data-relation-type="equipWorld">
                 <span class="picker-trigger-icon">⬡</span>
                 <span class="picker-trigger-label">Select worlds…</span>
             </button>
@@ -126,7 +127,8 @@ try {
             <div class="picker-chips" id="equipCurrentOwnerChips"></div>
             <button type="button" class="picker-trigger" data-picker="character"
                     data-target-chips="equipCurrentOwnerChips"
-                    data-target-hidden="equipCurrentOwnerHidden">
+                    data-target-hidden="equipCurrentOwnerHidden"
+                    data-relation-type="equipCurrentOwner">
                 <span class="picker-trigger-icon">◈</span>
                 <span class="picker-trigger-label">Select current owner…</span>
             </button>
@@ -141,7 +143,8 @@ try {
             <div class="picker-chips" id="equipPreviousOwnersChips"></div>
             <button type="button" class="picker-trigger" data-picker="character"
                     data-target-chips="equipPreviousOwnersChips"
-                    data-target-hidden="equipPreviousOwnersHidden">
+                    data-target-hidden="equipPreviousOwnersHidden"
+                    data-relation-type="equipPreviousOwner">
                 <span class="picker-trigger-icon">◈</span>
                 <span class="picker-trigger-label">Select previous owners…</span>
             </button>
@@ -163,7 +166,8 @@ try {
             <div class="picker-chips" id="equipOriginsChips"></div>
             <button type="button" class="picker-trigger" data-picker="story"
                     data-target-chips="equipOriginsChips"
-                    data-target-hidden="equipOriginsHidden">
+                    data-target-hidden="equipOriginsHidden"
+                    data-relation-type="equipOrigin">
                 <span class="picker-trigger-icon">◈</span>
                 <span class="picker-trigger-label">Select origin story…</span>
             </button>
