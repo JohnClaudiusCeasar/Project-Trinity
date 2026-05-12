@@ -161,7 +161,8 @@ try {
 
 } catch (PDOException $e) {
     $pdo->rollBack();
+    error_log('Faction creation failed: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to create faction: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Failed to create faction. Please try again.']);
 }
 ?>

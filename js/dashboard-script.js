@@ -983,6 +983,41 @@ function initFormSubmission(type, isEdit = false) {
             }
         });
 
+        // Serialize all picker hidden inputs to JSON arrays (non-faction forms)
+        // The handlers for world/character/equipment/story expect JSON arrays
+        if (type !== 'faction') {
+            document.querySelectorAll('.picker-field input[type="hidden"]').forEach(hiddenEl => {
+                const chipsId = hiddenEl.id.replace('Hidden', 'Chips');
+                const chipsEl = document.getElementById(chipsId);
+                if (!chipsEl || !chipsEl.children.length) return;
+
+                const items = [];
+                const hasRelationCards = chipsEl.querySelector('.relation-card');
+
+                if (hasRelationCards) {
+                    Array.from(chipsEl.children).forEach(card => {
+                        if (!card.classList.contains('relation-card')) return;
+                        const id = card.dataset.itemId;
+                        if (!id) return;
+                        const entry = { id: parseInt(id) };
+                        card.querySelectorAll('input, textarea, select').forEach(input => {
+                            const match = input.name.match(/\[(\w+)\]$/);
+                            if (match) entry[match[1]] = input.value;
+                        });
+                        items.push(entry);
+                    });
+                } else {
+                    Array.from(chipsEl.children).forEach(el => {
+                        const id = el.dataset.id;
+                        if (id) items.push({ id: parseInt(id) });
+                    });
+                }
+
+                hiddenEl.value = items.length ? JSON.stringify(items) : '';
+                formData.set(hiddenEl.name, hiddenEl.value);
+            });
+        }
+
         formData.append('type', type);
 
         try {

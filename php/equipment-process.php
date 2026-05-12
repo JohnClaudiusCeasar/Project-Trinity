@@ -125,7 +125,13 @@ try {
     // Link current owner (single)
     if (!empty($currentOwnerJson)) {
         $currentOwnerData = json_decode($currentOwnerJson, true);
-        $currentOwnerId = is_array($currentOwnerData) ? ($currentOwnerData['id'] ?? 0) : intval(trim($currentOwnerJson));
+        $currentOwnerId = 0;
+        if (is_array($currentOwnerData)) {
+            $first = reset($currentOwnerData);
+            $currentOwnerId = is_array($first) ? ($first['id'] ?? 0) : intval($first);
+        } else {
+            $currentOwnerId = intval(trim($currentOwnerJson));
+        }
         if ($currentOwnerId > 0) {
             $currentStmt = $pdo->prepare('INSERT INTO equipment_character
                 (equipment_id, character_id, ownership_type) VALUES (?, ?, ?)');
@@ -151,7 +157,13 @@ try {
     // Link origins story (single)
     if (!empty($originsJson)) {
         $originsData = json_decode($originsJson, true);
-        $originsId = is_array($originsData) ? ($originsData['id'] ?? 0) : intval(trim($originsJson));
+        $originsId = 0;
+        if (is_array($originsData)) {
+            $first = reset($originsData);
+            $originsId = is_array($first) ? ($first['id'] ?? 0) : intval($first);
+        } else {
+            $originsId = intval(trim($originsJson));
+        }
         if ($originsId > 0) {
             $storyStmt = $pdo->prepare('INSERT INTO equipment_story
                 (equipment_id, story_id, role) VALUES (?, ?, ?)');
@@ -170,7 +182,8 @@ try {
 
 } catch (PDOException $e) {
     $pdo->rollBack();
+    error_log('Equipment creation failed: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to process equipment: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Failed to process equipment. Please try again.']);
 }
 ?>
