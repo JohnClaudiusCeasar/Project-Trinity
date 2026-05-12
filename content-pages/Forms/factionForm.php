@@ -62,7 +62,8 @@
             <div class="picker-chips" id="factionFoundingAuthorityChips"></div>
             <button type="button" class="picker-trigger" data-picker="character"
                     data-target-chips="factionFoundingAuthorityChips"
-                    data-target-hidden="factionFoundingAuthorityHidden">
+                    data-target-hidden="factionFoundingAuthorityHidden"
+                    data-relation-type="characterRuler">
                 <span class="picker-trigger-icon">◈</span>
                 <span class="picker-trigger-label">Select founding authority…</span>
             </button>
@@ -110,7 +111,8 @@
                     <div class="picker-chips" id="factionPrimaryLeaderChips"></div>
                     <button type="button" class="picker-trigger" data-picker="character"
                             data-target-chips="factionPrimaryLeaderChips"
-                            data-target-hidden="factionPrimaryLeaderHidden">
+                            data-target-hidden="factionPrimaryLeaderHidden"
+                            data-relation-type="characterRuler">
                         <span class="picker-trigger-icon">◈</span>
                         <span class="picker-trigger-label">Select primary leader…</span>
                     </button>
@@ -125,7 +127,8 @@
                     <div class="picker-chips" id="factionSecondaryLeaderChips"></div>
                     <button type="button" class="picker-trigger" data-picker="character"
                             data-target-chips="factionSecondaryLeaderChips"
-                            data-target-hidden="factionSecondaryLeaderHidden">
+                            data-target-hidden="factionSecondaryLeaderHidden"
+                            data-relation-type="characterRuler">
                         <span class="picker-trigger-icon">◈</span>
                         <span class="picker-trigger-label">Select secondary leader…</span>
                     </button>
@@ -140,7 +143,8 @@
                     <div class="picker-chips" id="factionOthersChips"></div>
                     <button type="button" class="picker-trigger" data-picker="character"
                             data-target-chips="factionOthersChips"
-                            data-target-hidden="factionOthersHidden">
+                            data-target-hidden="factionOthersHidden"
+                            data-relation-type="characterRuler">
                         <span class="picker-trigger-icon">◈</span>
                         <span class="picker-trigger-label">Select other members…</span>
                     </button>

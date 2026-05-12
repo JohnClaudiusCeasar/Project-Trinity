@@ -68,7 +68,8 @@ try {
             <div class="picker-chips" id="worldCurrentRulersChips"></div>
             <button type="button" class="picker-trigger" data-picker="character"
                     data-target-chips="worldCurrentRulersChips"
-                    data-target-hidden="worldCurrentRulersHidden">
+                    data-target-hidden="worldCurrentRulersHidden"
+                    data-relation-type="characterRuler">
                 <span class="picker-trigger-icon">◈</span>
                 <span class="picker-trigger-label">Select current rulers…</span>
             </button>
@@ -83,7 +84,8 @@ try {
             <div class="picker-chips" id="worldPreviousRulersChips"></div>
             <button type="button" class="picker-trigger" data-picker="character"
                     data-target-chips="worldPreviousRulersChips"
-                    data-target-hidden="worldPreviousRulersHidden">
+                    data-target-hidden="worldPreviousRulersHidden"
+                    data-relation-type="characterRuler">
                 <span class="picker-trigger-icon">◈</span>
                 <span class="picker-trigger-label">Select previous rulers…</span>
             </button>

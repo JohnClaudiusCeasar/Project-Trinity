@@ -13,19 +13,33 @@ const PICKER_META = {
     faction:    { eyebrow: 'Linked Factions', title: 'Select Factions' },
 };
 
-const WORLD_ROLE_OPTIONS = [
-    { value: '',           label: 'Select role…' },
-    { value: 'native',     label: 'Native'       },
-    { value: 'exile',      label: 'Exile'        },
-    { value: 'visitor',    label: 'Visitor'      },
-    { value: 'ruler',      label: 'Ruler'        },
-    { value: 'guardian',   label: 'Guardian'      },
-    { value: 'outcast',    label: 'Outcast'       },
-    { value: 'refugee',    label: 'Refugee'       },
-    { value: 'conqueror',  label: 'Conqueror'     },
-    { value: 'unknown',    label: 'Unknown'       },
-    { value: 'other',      label: 'Other'         },
-];
+// Type-specific relation field configurations for picker chips
+const RELATION_FIELDS = {
+    faction: {
+        fields: [
+            { type: 'text',     key: 'role',       label: 'Role',         placeholder: 'e.g. Member, Leader, Ally…' },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe the character's tie to this faction…" },
+        ]
+    },
+    world: {
+        fields: [
+            { type: 'text',     key: 'role',       label: 'Role / Status', placeholder: 'e.g. Native, Exile, Visitor…' },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe the character's tie to this world…" },
+        ]
+    },
+    equipment: {
+        fields: [
+            { type: 'select',   key: 'ownership',  label: 'Ownership',    options: ['Current Owner', 'Inherited', 'Stolen'] },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe the character's tie to this item…" },
+        ]
+    },
+    characterRuler: {
+        fields: [
+            { type: 'text',     key: 'role',       label: 'Role / Status', placeholder: 'e.g. Monarch, Advisor, General…' },
+            { type: 'textarea', key: 'connection',  label: 'Connection',   placeholder: "Describe this character's role and connection…" },
+        ]
+    }
+};
 
 // ------------------------------------------------------------
 // HELPER FUNCTIONS FOR PICKER CARDS
@@ -71,124 +85,109 @@ function renderPickerCard(item, type) {
 }
 
 // ------------------------------------------------------------
-// WORLD RELATION CARDS
+// RELATION CARDS — generic collapsible cards with type-specific fields
 // ------------------------------------------------------------
-function syncWorldRelationCards(relationsEl, items) {
-    if (!relationsEl) return;
+function renderRelationFields(type, itemId, prevData) {
+    const config = RELATION_FIELDS[type];
+    if (!config) return '';
 
+    return config.fields.map(field => {
+        const capKey = field.key.charAt(0).toUpperCase() + field.key.slice(1);
+        const fieldName = `${type}${capKey}[${itemId}]`;
+        const value = prevData && prevData[field.key] != null ? prevData[field.key] : '';
+
+        if (field.type === 'textarea') {
+            return `
+                <div class="relation-card-field">
+                    <label class="relation-card-label" for="${fieldName}">${field.label}</label>
+                    <textarea class="form-input form-textarea relation-card-input"
+                              id="${fieldName}"
+                              name="${fieldName}"
+                              rows="2"
+                              placeholder="${field.placeholder || ''}">${escapeHtml(value)}</textarea>
+                </div>`;
+        }
+
+        if (field.type === 'select' && field.options) {
+            const opts = field.options.map(opt =>
+                `<option value="${escapeHtml(opt)}" ${value === opt ? 'selected' : ''}>${escapeHtml(opt)}</option>`
+            ).join('');
+            return `
+                <div class="relation-card-field">
+                    <label class="relation-card-label" for="${fieldName}">${field.label}</label>
+                    <select class="form-input form-select relation-card-input"
+                            id="${fieldName}"
+                            name="${fieldName}">
+                        <option value="">Select ${field.label.toLowerCase()}…</option>
+                        ${opts}
+                    </select>
+                </div>`;
+        }
+
+        return `
+            <div class="relation-card-field">
+                <label class="relation-card-label" for="${fieldName}">${field.label}</label>
+                <input class="form-input relation-card-input"
+                       type="text"
+                       id="${fieldName}"
+                       name="${fieldName}"
+                       placeholder="${field.placeholder || ''}"
+                       value="${escapeHtml(value)}">
+            </div>`;
+    }).join('');
+}
+
+function renderRelationCards(chipsEl, items, type) {
+    // Collect existing field data from current chips before re-rendering
     const existingData = {};
-    relationsEl.querySelectorAll('.world-relation-card').forEach(card => {
-        const id = card.dataset.worldId;
-        existingData[id] = {
-            role:     card.querySelector('.world-relation-role')?.value || '',
-            desc:     card.querySelector('.world-relation-desc')?.value || '',
-            expanded: card.classList.contains('is-expanded'),
-        };
+    const config = RELATION_FIELDS[type];
+    chipsEl.querySelectorAll('.relation-card').forEach(card => {
+        const id = card.dataset.itemId;
+        if (!id) return;
+        const entry = {};
+        if (config) {
+            config.fields.forEach(field => {
+                const capKey = field.key.charAt(0).toUpperCase() + field.key.slice(1);
+                const fieldName = `${type}${capKey}[${id}]`;
+                const input = card.querySelector(`[name="${fieldName}"]`);
+                if (input) entry[field.key] = input.value;
+            });
+        }
+        existingData[id] = entry;
     });
 
     if (!items.length) {
-        relationsEl.innerHTML = '';
+        chipsEl.innerHTML = '';
         return;
     }
 
-    relationsEl.innerHTML = items.map(item => {
-        const prev = existingData[item.id] || { role: '', desc: '', expanded: false };
-        const worldData = window.PICKER_DB_DATA?.world?.find(w => String(w.id) === String(item.id)) || {};
+    const iconMap = { world: '⬡', equipment: '✦', faction: '▣', characterRuler: '♟' };
+    const icon = iconMap[type] || '▸';
 
-        const fullDesc = worldData.desc || '';
-        const words = fullDesc.split(/\s+/);
-        const truncated = words.length > 150 ? words.slice(0, 150).join(' ') + '…' : fullDesc;
-
-        const charCount = worldData.characters ?? 0;
-        const artCount = worldData.artifacts ?? 0;
-
-        const roleOptions = WORLD_ROLE_OPTIONS.map(opt =>
-            `<option value="${opt.value}" ${prev.role === opt.value ? 'selected' : ''}>${opt.label}</option>`
-        ).join('');
-
-        const isExpanded = prev.expanded;
+    chipsEl.innerHTML = items.map(item => {
+        const prev = existingData[item.id] || {};
 
         return `
-        <div class="world-relation-card ${isExpanded ? 'is-expanded' : ''}" data-world-id="${item.id}">
-            <button type="button" class="world-relation-toggle" aria-expanded="${isExpanded}" aria-controls="worldRelBody_${item.id}">
-                <span class="world-relation-icon">⬡</span>
-                <span class="world-relation-name">${item.name}</span>
-                <span class="world-relation-arrow" aria-hidden="true">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
-                    </svg>
-                </span>
-            </button>
-
-            <div class="world-relation-collapsible" id="worldRelBody_${item.id}" ${isExpanded ? '' : 'hidden'}>
-                <div class="world-summary-panel">
-                    <p class="world-summary-desc">${truncated}</p>
-                    <div class="world-summary-stats">
-                        <div class="world-summary-stat">
-                            <span class="world-summary-stat-label">No. of Characters</span>
-                            <span class="world-summary-stat-value">${charCount}</span>
-                        </div>
-                        <div class="world-summary-stat">
-                            <span class="world-summary-stat-label">No. of Artifacts</span>
-                            <span class="world-summary-stat-value">${artCount}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="world-relation-divider"></div>
-
-                <div class="world-relation-body">
-                    <div class="world-relation-field">
-                        <label class="world-relation-label" for="worldRole_${item.id}">Role / Status</label>
-                        <select class="form-input form-select world-relation-role"
-                                id="worldRole_${item.id}"
-                                name="worldRole[${item.id}]">
-                            ${roleOptions}
-                        </select>
-                    </div>
-                    <div class="world-relation-field">
-                        <label class="world-relation-label" for="worldDesc_${item.id}">Connection</label>
-                        <textarea class="form-input form-textarea world-relation-desc"
-                                  id="worldDesc_${item.id}"
-                                  name="worldDesc[${item.id}]"
-                                  rows="2"
-                                  placeholder="Describe the character's tie to this world…">${prev.desc}</textarea>
-                    </div>
+        <div class="relation-card" data-item-id="${item.id}">
+            <div class="relation-card-header">
+                <button type="button" class="relation-card-toggle" aria-expanded="false">
+                    <span class="relation-card-icon">${icon}</span>
+                    <span class="relation-card-name">${escapeHtml(item.name)}</span>
+                    <span class="relation-card-arrow" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+                        </svg>
+                    </span>
+                </button>
+                <button type="button" class="relation-card-remove" data-id="${item.id}" aria-label="Remove ${escapeHtml(item.name)}">×</button>
+            </div>
+            <div class="relation-card-collapsible" hidden>
+                <div class="relation-card-body">
+                    ${renderRelationFields(type, item.id, prev)}
                 </div>
             </div>
         </div>`;
     }).join('');
-
-    relationsEl.querySelectorAll('.world-relation-toggle').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const card = btn.closest('.world-relation-card');
-            const collapsible = card.querySelector('.world-relation-collapsible');
-            const isNowOpen = !card.classList.contains('is-expanded');
-
-            card.classList.toggle('is-expanded', isNowOpen);
-            btn.setAttribute('aria-expanded', isNowOpen);
-
-            if (isNowOpen) {
-                collapsible.removeAttribute('hidden');
-                collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
-            } else {
-                collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
-                collapsible.getBoundingClientRect();
-                collapsible.style.maxHeight = '0';
-                collapsible.addEventListener('transitionend', () => {
-                    if (!card.classList.contains('is-expanded')) {
-                        collapsible.setAttribute('hidden', '');
-                        collapsible.style.maxHeight = '';
-                    }
-                }, { once: true });
-            }
-        });
-    });
-
-    relationsEl.querySelectorAll('.world-relation-card').forEach((card, i) => {
-        card.style.animationDelay = `${i * 60}ms`;
-        card.classList.add('world-relation-card--enter');
-    });
 }
 
 // ------------------------------------------------------------
@@ -245,7 +244,7 @@ function initPickerModal() {
             allItems = data.items || [];
             availableFilters = data.filters || [];
             
-            // Keep a local copy for syncWorldRelationCards if needed
+            // Keep a local copy for relation card lookups if needed
             if (!window.PICKER_DB_DATA) window.PICKER_DB_DATA = {};
             window.PICKER_DB_DATA[type] = allItems;
             window.PICKER_DB_DATA.filters = window.PICKER_DB_DATA.filters || {};
@@ -426,11 +425,30 @@ function initPickerModal() {
 
         currentHiddenEl.value = selectedItems.map(s => s.id).join(',');
 
-        // Render as cards for all types except world (world has special relation cards)
-        if (currentType !== 'world') {
+        const overrideType = currentHiddenEl.dataset.relationType;
+        const configKey = overrideType === 'none' ? null : (overrideType || currentType);
+
+        if (configKey && RELATION_FIELDS[configKey]) {
+            renderRelationCards(currentChipsEl, selectedItems, configKey);
+
+            // Entrance animation
+            currentChipsEl.querySelectorAll('.relation-card').forEach((card, i) => {
+                card.style.animationDelay = `${i * 60}ms`;
+                card.classList.add('relation-card--enter');
+            });
+        } else if (overrideType === 'none') {
+            // Explicit opt-out: render simple tag chips
+            currentChipsEl.innerHTML = selectedItems.map(s => `
+                <span class="picker-chip" data-id="${s.id}">
+                    ${s.name}
+                    <button type="button" class="picker-chip-remove"
+                            data-id="${s.id}" aria-label="Remove ${s.name}">×</button>
+                </span>
+            `).join('');
+        } else {
+            // No relation fields defined: render picker cards
             currentChipsEl.innerHTML = selectedItems.map(item => renderPickerCard(item, currentType)).join('');
             
-            // Add expand/collapse handlers for "see more"
             currentChipsEl.querySelectorAll('.picker-card-expand').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const card = e.target.closest('.picker-card');
@@ -443,37 +461,52 @@ function initPickerModal() {
                     e.target.textContent = isExpanded ? '...see more' : ' see less';
                 });
             });
-        } else {
-            // Keep simple chips for world (they get rendered as relation cards separately)
-            currentChipsEl.innerHTML = selectedItems.map(s => `
-                <span class="picker-chip" data-id="${s.id}">
-                    ${s.name}
-                    <button type="button" class="picker-chip-remove"
-                            data-id="${s.id}" aria-label="Remove ${s.name}">×</button>
-                </span>
-            `).join('');
         }
 
-        currentChipsEl.querySelectorAll('.picker-chip-remove, .picker-card-remove').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const removedId = btn.dataset.id;
-                const chipOrCard = btn.closest('.picker-chip') || btn.closest('.picker-card');
-                chipOrCard?.remove();
-                const vals = currentHiddenEl.value.split(',').filter(v => v !== removedId);
-                currentHiddenEl.value = vals.join(',');
-
-                if (currentRelationsEl) {
-                    const card = currentRelationsEl.querySelector(`.world-relation-card[data-world-id="${removedId}"]`);
-                    if (card) {
-                        card.classList.add('world-relation-card--exit');
-                        card.addEventListener('animationend', () => card.remove(), { once: true });
-                    }
-                }
-            });
+        // Delegated remove handler on the chips container
+        currentChipsEl.addEventListener('click', function handleChipRemove(e) {
+            const removeBtn = e.target.closest('.relation-card-remove, .picker-card-remove, .picker-chip-remove');
+            if (!removeBtn) return;
+            const removedId = removeBtn.dataset.id;
+            const card = removeBtn.closest('.relation-card, .picker-card, .picker-chip');
+            if (card) {
+                card.classList.add('relation-card--exit');
+                card.addEventListener('animationend', () => card.remove(), { once: true });
+            } else {
+                card?.remove();
+            }
+            const vals = currentHiddenEl.value.split(',').filter(v => v !== removedId);
+            currentHiddenEl.value = vals.join(',');
         });
 
-        if (currentType === 'world' && currentRelationsEl) {
-            syncWorldRelationCards(currentRelationsEl, selectedItems);
+        // Delegated toggle handler for relation cards
+        if (configKey && RELATION_FIELDS[configKey]) {
+            currentChipsEl.addEventListener('click', function handleRelationToggle(e) {
+                const toggleBtn = e.target.closest('.relation-card-toggle');
+                if (!toggleBtn) return;
+                const card = toggleBtn.closest('.relation-card');
+                if (!card) return;
+                const collapsible = card.querySelector('.relation-card-collapsible');
+                const isNowOpen = !card.classList.contains('is-expanded');
+
+                card.classList.toggle('is-expanded', isNowOpen);
+                toggleBtn.setAttribute('aria-expanded', isNowOpen);
+
+                if (isNowOpen) {
+                    collapsible.removeAttribute('hidden');
+                    collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
+                } else {
+                    collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
+                    collapsible.getBoundingClientRect();
+                    collapsible.style.maxHeight = '0';
+                    collapsible.addEventListener('transitionend', () => {
+                        if (!card.classList.contains('is-expanded')) {
+                            collapsible.setAttribute('hidden', '');
+                            collapsible.style.maxHeight = '';
+                        }
+                    }, { once: true });
+                }
+            });
         }
 
         closeModal();
@@ -511,6 +544,7 @@ function initPickerTriggers() {
             const relationsEl = btn.dataset.targetRelations
                 ? document.getElementById(btn.dataset.targetRelations)
                 : null;
+            hiddenEl.dataset.relationType = btn.dataset.relationType || '';
             if (type && chipsEl && hiddenEl) {
                 window.openPickerModal(type, chipsEl, hiddenEl, relationsEl);
             }

@@ -77,16 +77,13 @@ try {
             <button type="button" class="picker-trigger" data-picker="character"
                     data-target-chips="storyCharactersChips"
                     data-target-hidden="storyCharactersHidden"
-                    data-target-relations="storyCharacterRelations">
+                    data-relation-type="none">
                 <span class="picker-trigger-icon">◈</span>
                 <span class="picker-trigger-label">Select characters…</span>
             </button>
         </div>
         <input type="hidden" id="storyCharactersHidden" name="storyCharacters">
     </div>
-
-    <!-- Character Relations — injected dynamically -->
-    <div class="character-relations" id="storyCharacterRelations"></div>
 
     <!-- Worlds Involved -->
     <div class="form-field">
@@ -96,16 +93,13 @@ try {
             <button type="button" class="picker-trigger" data-picker="world"
                     data-target-chips="storyWorldsChips"
                     data-target-hidden="storyWorldsHidden"
-                    data-target-relations="storyWorldRelations">
+                    data-relation-type="none">
                 <span class="picker-trigger-icon">⬡</span>
                 <span class="picker-trigger-label">Select worlds…</span>
             </button>
         </div>
         <input type="hidden" id="storyWorldsHidden" name="storyWorlds">
     </div>
-
-    <!-- World Relations — injected dynamically -->
-    <div class="world-relations" id="storyWorldRelations"></div>
 
     <!-- Equipment Involved -->
     <div class="form-field">
@@ -114,7 +108,8 @@ try {
             <div class="picker-chips" id="storyEquipmentChips"></div>
             <button type="button" class="picker-trigger" data-picker="equipment"
                     data-target-chips="storyEquipmentChips"
-                    data-target-hidden="storyEquipmentHidden">
+                    data-target-hidden="storyEquipmentHidden"
+                    data-relation-type="none">
                 <span class="picker-trigger-icon">✦</span>
                 <span class="picker-trigger-label">Select equipment…</span>
             </button>

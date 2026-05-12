@@ -62,16 +62,19 @@ try {
         </select>
     </div>
 
+    <!-- Faction Picker -->
     <div class="form-field">
-        <label class="form-label" for="charFaction">Faction / Affiliation</label>
-        <select class="form-input form-select" id="charFaction" name="charFaction">
-            <option value="">Select faction…</option>
-            <option value="the-veil-accord">The Veil Accord</option>
-            <option value="order-of-the-ashen-mark">Order of the Ashen Mark</option>
-            <option value="freelance-independent">Freelance / Independent</option>
-            <option value="the-hollow-collective">The Hollow Collective</option>
-            <option value="unaffiliated">Unaffiliated</option>
-        </select>
+        <label class="form-label">Faction / Affiliation</label>
+        <div class="picker-field" id="charFactionField">
+            <div class="picker-chips" id="charFactionChips"></div>
+            <button type="button" class="picker-trigger" data-picker="faction"
+                    data-target-chips="charFactionChips"
+                    data-target-hidden="charFactionHidden">
+                <span class="picker-trigger-icon">▣</span>
+                <span class="picker-trigger-label">Select factions…</span>
+            </button>
+        </div>
+        <input type="hidden" id="charFactionHidden" name="charFaction">
     </div>
 
     <!-- World Picker -->
@@ -81,17 +84,13 @@ try {
             <div class="picker-chips" id="charWorldChips"></div>
             <button type="button" class="picker-trigger" data-picker="world"
                     data-target-chips="charWorldChips"
-                    data-target-hidden="charWorldHidden"
-                    data-target-relations="charWorldRelations">
+                    data-target-hidden="charWorldHidden">
                 <span class="picker-trigger-icon">⬡</span>
                 <span class="picker-trigger-label">Select worlds…</span>
             </button>
         </div>
         <input type="hidden" id="charWorldHidden" name="charWorld">
     </div>
-
-    <!-- World Relation Cards — injected dynamically by picker-modal.js -->
-    <div class="world-relations" id="charWorldRelations"></div>
 
     <!-- Profile Image Upload -->
     <div class="form-field">
