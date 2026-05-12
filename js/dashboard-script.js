@@ -14,7 +14,7 @@ const NAV_ROUTES = {
     view:     { type: 'fetch', src: 'content-pages/Dashboard/dashboardView.php'     },
     profile:  { type: 'fetch', src: 'content-pages/Dashboard/dashboardProfile.php'  },
     projects: { type: 'placeholder', label: 'Projects' },
-    explore:  { type: 'placeholder', label: 'Explore'  },
+    explore:  { type: 'fetch', src: 'content-pages/Dashboard/dashboardExplore.php' },
     guides:   { type: 'placeholder', label: 'Guides'   },
 };
 
@@ -52,6 +52,9 @@ async function loadPage(pageKey) {
             }
             if (pageKey === 'archives') {
                 initArchivePage();
+            }
+            if (pageKey === 'explore') {
+                initExplorePage();
             }
         } catch (err) {
             console.error(err);
@@ -543,6 +546,204 @@ function initArchivePage() {
     });
 
     loadArchiveEntries();
+}
+
+// ============================================================
+// EXPLORE PAGE
+// ============================================================
+function initExplorePage() {
+    const grid = document.getElementById('exploreGrid');
+    if (!grid) return;
+
+    let currentCategory = 'all';
+    let currentSearch   = '';
+    let currentSort     = 'latest';
+    let currentPage     = 1;
+    let isLoading       = false;
+    let hasMore         = true;
+
+    const filterBtns = document.querySelectorAll('.explore-filter-btn');
+    const searchInput = document.getElementById('exploreSearchInput');
+    const searchClear = document.getElementById('exploreSearchClear');
+    const sortSelect  = document.getElementById('exploreSort');
+    const loadBtn     = document.getElementById('exploreLoadBtn');
+    const spotlightGrid = document.getElementById('spotlightGrid');
+
+    // ---- Spotlight ----
+    async function loadSpotlight() {
+        if (!spotlightGrid) return;
+        try {
+            const res = await fetch('api/get-spotlight-entries.php');
+            const data = await res.json();
+            if (data.success && data.spotlight.length) {
+                spotlightGrid.innerHTML = data.spotlight.map((entry, i) => {
+                    const isFeatured = i === 0;
+                    const name = entry.name || entry.title || 'Untitled';
+                    const desc = entry.description || entry.synopsis || '';
+                    const truncDesc = desc.length > 120 ? desc.substring(0, 120) + '...' : desc;
+                    const wordInfo = entry.word_count ? ' &middot; ' + formatExploreWordCount(entry.word_count) + ' words' : '';
+                    const imgHtml = entry.image
+                        ? '<img src="' + entry.image + '" alt="' + name + '">'
+                        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+                    const imgContainer = entry.image
+                        ? '<div class="spotlight-card-image">' + imgHtml + '</div>'
+                        : '<div class="spotlight-card-image-placeholder">' + imgHtml + '</div>';
+
+                    return '<div class="spotlight-card' + (isFeatured ? ' featured' : '') + '" data-id="' + entry.id + '" data-type="' + entry.type + '">'
+                        + imgContainer
+                        + '<div class="spotlight-card-body">'
+                        + (isFeatured ? '<div class="spotlight-card-badge">&#9733; Featured Entry</div>' : '')
+                        + '<h3 class="spotlight-card-title">' + name + '</h3>'
+                        + (truncDesc ? '<p class="spotlight-card-desc">' + truncDesc + '</p>' : '')
+                        + '<p class="spotlight-card-meta">by ' + entry.username + ' &middot; ' + entry.type + wordInfo + '</p>'
+                        + '<button class="spotlight-card-action" data-id="' + entry.id + '" data-type="' + entry.type + '">View Entry</button>'
+                        + '</div></div>';
+                }).join('');
+
+                spotlightGrid.querySelectorAll('.spotlight-card-action, .spotlight-card').forEach(el => {
+                    el.addEventListener('click', function (e) {
+                        const card = this.closest('.spotlight-card');
+                        if (card) {
+                            const id = card.dataset.id;
+                            const type = card.dataset.type;
+                            if (id && type) openViewModal(id, type);
+                        }
+                    });
+                });
+            } else {
+                spotlightGrid.innerHTML = '';
+                document.querySelector('.explore-spotlight')?.style.setProperty('display', 'none');
+            }
+        } catch (err) {
+            console.error('Failed to load spotlight:', err);
+        }
+    }
+
+    function formatExploreWordCount(count) {
+        if (count >= 1000) return (count / 1000).toFixed(1) + 'k';
+        return count;
+    }
+
+    // ---- Entries ----
+    async function loadEntries(reset = true) {
+        if (isLoading) return;
+        isLoading = true;
+
+        if (reset) {
+            currentPage = 1;
+            hasMore = true;
+            grid.innerHTML = '<div class="loading-state">Loading entries...</div>';
+        }
+
+        try {
+            const params = new URLSearchParams({
+                category: currentCategory,
+                sort: currentSort,
+                page: currentPage,
+                limit: 12
+            });
+            if (currentSearch) params.set('search', currentSearch);
+
+            const res = await fetch('api/get-public-entries.php?' + params.toString());
+            const data = await res.json();
+
+            if (reset) grid.innerHTML = '';
+
+            if (data.success && data.html) {
+                if (reset) {
+                    grid.innerHTML = data.html;
+                } else {
+                    grid.insertAdjacentHTML('beforeend', data.html);
+                }
+                hasMore = data.hasMore;
+                loadBtn.style.display = hasMore ? 'block' : 'none';
+                initExploreCardActions();
+            } else {
+                if (reset) grid.innerHTML = '<p class="empty-state">No entries found. Be the first to share!</p>';
+                loadBtn.style.display = 'none';
+            }
+        } catch (err) {
+            console.error('Error loading explore entries:', err);
+            if (reset) grid.innerHTML = '<p class="empty-state">Failed to load entries. Try again.</p>';
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    function initExploreCardActions() {
+        grid.querySelectorAll('.explore-card').forEach(card => {
+            card.addEventListener('click', function (e) {
+                if (e.target.closest('.explore-fav-btn')) return;
+                const id = this.dataset.id;
+                const type = this.dataset.type;
+                if (id && type) openViewModal(id, type);
+            });
+        });
+        grid.querySelectorAll('.explore-action-btn[data-id]').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const id = this.dataset.id;
+                const type = this.dataset.type;
+                if (id && type) openViewModal(id, type);
+            });
+        });
+        grid.querySelectorAll('.explore-fav-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                this.classList.toggle('faved');
+                const svg = this.querySelector('svg');
+                if (this.classList.contains('faved')) {
+                    svg.style.fill = 'currentColor';
+                } else {
+                    svg.style.fill = 'none';
+                }
+            });
+        });
+    }
+
+    // ---- Filters ----
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = btn.dataset.category || 'all';
+            loadEntries(true);
+        });
+    });
+
+    // ---- Search ----
+    let searchTimeout;
+    searchInput?.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentSearch = searchInput.value.trim();
+            searchClear?.classList.toggle('visible', currentSearch.length > 0);
+            loadEntries(true);
+        }, 400);
+    });
+
+    searchClear?.addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearch = '';
+        searchClear.classList.remove('visible');
+        loadEntries(true);
+    });
+
+    // ---- Sort ----
+    sortSelect?.addEventListener('change', () => {
+        currentSort = sortSelect.value;
+        loadEntries(true);
+    });
+
+    // ---- Load More ----
+    loadBtn?.addEventListener('click', () => {
+        currentPage++;
+        loadEntries(false);
+    });
+
+    // ---- Init ----
+    loadSpotlight();
+    loadEntries(true);
 }
 
 // ============================================================

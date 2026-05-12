@@ -34,6 +34,7 @@ $initial = strtoupper(substr($username, 0, 1));
     <link rel="stylesheet" href="css/modal-picker.css">
     <link rel="stylesheet" href="css/entry-card.css">
     <link rel="stylesheet" href="css/dashboard-profile.css">
+    <link rel="stylesheet" href="css/dashboard-explore.css">
 
     <!-- Cropper.js for image cropping -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -67,6 +68,10 @@ $initial = strtoupper(substr($username, 0, 1));
             <a href="#create" class="sidebar-nav-item" data-page="create">
                 <span class="nav-icon">✦</span>
                 <span>Create</span>
+            </a>
+            <a href="#explore" class="sidebar-nav-item" data-page="explore">
+                <span class="nav-icon">◉</span>
+                <span>Explore</span>
             </a>
             <a href="#projects" class="sidebar-nav-item" data-page="projects">
                 <span class="nav-icon">⬡</span>
